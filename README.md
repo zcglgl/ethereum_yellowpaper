@@ -14,5 +14,6 @@ The paper comes as a single ``latex`` file ``Paper.tex``. The latest version is 
 In order to build, use the supplied build script (``build.sh``). Following the first time, you can use the standard `pdflatex` tools like http://latex.informatik.uni-halle.de/latex-online/latex.php for compiling/preview. It can be viewed in ``PDF`` format after building.
 
 
+
 ## Other language versions
 - [Chinese](https://github.com/yuange1024/ethereum_yellowpaper) translated by Guangbin Cui(崔广斌) and Tianlu Gao(高天露)
