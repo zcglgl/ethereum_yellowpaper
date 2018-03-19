@@ -16,5 +16,5 @@ fi
 
 echo "\newcommand{\YellowPaperVersionNumber}{$REV}" > Version.tex
 
-xelatex  -interaction=errorstopmode -halt-on-error Paper_Chinese.tex 
+xelatex  -interaction=errorstopmode -halt-on-error ethereum_yellow_paper_cn.tex
 
