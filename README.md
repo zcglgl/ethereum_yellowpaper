@@ -16,4 +16,5 @@ In order to build, use the supplied build script (``build.sh``). Following the f
 
 
 ## Other language versions
-- [Chinese](https://github.com/yuange1024/ethereum_yellowpaper) translated by Guangbin Cui(崔广斌) and Tianlu Gao(高天露)
+- [Chinese](https://github.com/yuange1024/ethereum_yellowpaper) translated by Yuange(崔广斌, 微信: yuange1024 ,加好友时请注明区块链) and Tianlu Gao(高天露)
+
