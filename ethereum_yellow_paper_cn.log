@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017) (preloaded format=xelatex 2017.7.29)  20 MAR 2018 19:34
+This is XeTeX, Version 3.14159265-2.6-0.99998 (TeX Live 2017) (preloaded format=xelatex 2017.7.29)  21 MAR 2018 14:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1749,7 +1749,7 @@ LaTeX Font Warning: Command \small invalid in math mode on input line 1079.
 [10]
 Underfull \hbox (badness 10000) in paragraph at lines 1185--1186
 [][][][][][][][] [] [][][][][][][][][][][] [] [][][][] [] [][][][][][] [] [][][
-][][] [] [][][][][][][] []
+][][][][][] [] [][][][][][] []
  []
 
 (./ethereum_yellow_paper_cn.bbl
