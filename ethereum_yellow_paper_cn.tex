@@ -1,7 +1,6 @@
 \documentclass[9pt,oneside]{amsart}
 \usepackage{xeCJK}
-\setCJKmainfont{Adobe Song Std}
-
+\setCJKmainfont{SimSun}
 \usepackage{url}
 \usepackage{cancel}
 \usepackage{xspace}
@@ -44,7 +43,7 @@
 \title{以太坊：一种安全去中心化的通用交易账本 \\ {\smaller \textbf{EIP-150版本 (\YellowPaperVersionNumber{})}}}
 \author{
     原文作者：Dr. Gavin Wood, gavin@ethcore.io\\
-    译者：崔广斌（微信号：yuange1024）；高天露（tianlu.jorden.gao@gmail.com）
+    译者：崔广斌（微信号：yuange1024）；高天露（tianlu.jorden.gao@gmail.com） \\
     修订、勘误：杨镇（rivers.yang@icloud.com）
 }
 \begin{document}
@@ -79,9 +78,9 @@
 
 \subsection{前人工作} \label{ch:previous}
 
-\cite{buterin2013ethereum} 在2013年9月下旬第一次提出了这种系统的核心机制。虽然现在发展出了多种方案，但最关键的部分，具备图灵完备语言且不受限制的内部交易存贮容量的区块链，仍未变化。
+\cite{buterin2013ethereum} 在 2013 年 11 月下旬第一次提出了这种系统的核心机制。虽然现在已经在很多方面都有了进化，但其核心特性没有变化。那就是：这是一个具有图灵完备的语言和实质上具有无限的内部交易数据存储容量的区块链。
 
-\cite{dwork92pricingvia} 提出了一种使用计算支出的密码学证明方式(proof-of-work，工作量证明)在互联网上传递信号值。信号值用作阻挡垃圾邮件，而不是任何一种货币，但展示了一个基本的数据通道可以承载强大经济信号的可能性， 允许接受者无需依赖信任而做出物理断言。\cite{back2002hashcash} 后来设计了一个类似的系统。
+\cite{dwork92pricingvia} 第一次提出了使用计算开销的密码学证明（“proof-of-work”，即工作量证明）来作为在互联网上传递价值信号的一种手段。这里所使用的价值信号，是作为对垃圾邮件的震慑机制的，并不是任何形式的货币；但这却极大地论证了一种承载强大的经济信号的基本数据通道的潜在可能，这种通道允许数据接受者不依赖任何信任就可以做出物理断言。\cite{back2002hashcash} 后来设计了一个类似的系统。
 
 \cite{vishnumurthy03karma:a} 最早使用工作量证明作为强大的经济信号保证货币安全。在这个案例中，代币用作检查点对点（peer-to-peer,p2p）文件交易，同时保证“消费者”能支付给为他们提供服务的“供应商”。这种通过工作量证明的安全模型逐步扩展，包括使用电子签名和账本技术，以保证历史记录不被篡改，怀有恶意的用户不能进行欺诈支付或不公平的抱怨。五年后（2008年），中本聪\cite{nakamoto2008bitcoin} 介绍了另一种更广泛的工作量证明安全价值代币。这个项目的成果就是比特币,比特币成为了第一个被全球广泛认可的去中心化交易账本。
 
