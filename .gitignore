@@ -1,14 +1,13 @@
 .DS_Store
-Paper.aux
-Paper.bbl
-Paper.blg
-Paper.log
-Paper.pdf
-Version.tex
+*.aux
+*.bbl
+*.blg
+*.log
+*.pdf
+*.fdb_latexmk
+*.fls
 
-Paper_Chinese.aux
-Paper_Chinese.blg
-Paper_Chinese.log
+Version.tex
 
 .idea
 
