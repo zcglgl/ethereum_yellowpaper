@@ -6,6 +6,7 @@
 *.pdf
 *.fdb_latexmk
 *.fls
+*.synctex.gz
 
 Version.tex
 
