@@ -70,7 +70,7 @@
 \author{
     原文作者：Dr. Gavin Wood, gavin@ethcore.io\\
     正文翻译：崔广斌（微信号：yuange1024）；高天露（tianlu.jorden.gao@gmail.com） \\
-    正文校订、版本更新：杨镇（rivers.yang@icloud.com）
+    拜占庭版本校订/更新：杨镇（rivers.yang@icloud.com）
 }
 \begin{document}
 
@@ -215,11 +215,12 @@ $10^{18}$ & Ether（以太） \\
 世界状态（\textit{state}）是在地址（160 位的标识符）和账户状态（序列化为 RLP 的数据结构，详见附录 \ref{app:rlp}）的映射。虽然世界状态没有直接储存在区块链上，但会假定在实施过程中会将这个映射维护在一个修改过的 Merkle Patricia 树上（即 \textit{trie}，详见附录 \ref{app:trie}）。这个 trie 需要一个简单的后端数据库去维护字节数组到字节数组的映射；我们称这个后端数据库为状态数据库。它有一系列的好处: 第一，这个结构的根节点是基于密码学依赖于所有内部数据的，它的哈希可以作为整个系统状态的一个安全标识；第二，作为一个不变的数据结构，我们可以通过简单地改变根节点哈希来召回任何一个先前的状态（在根节点哈希已知的条件下）。因为我们在区块链中储存了所以这样的根节点哈希值，所以我们可以很容易地恢复到特定的历史状态。
 
 账户状态 $\boldsymbol{\sigma}[a]$ 包含以下四个字段：
+
 \begin{description}
 \item[nonce] \linkdest{account_nonce}这个值等于由此账户地址发出的交易数量，或者由这个账户所创建的合约数量（当这个账户有关联代码时）。$\boldsymbol{\sigma}[a]_n$ 即表示状态 $\boldsymbol{\sigma}$ 中的地址 $a$ 的 nonce 值。
-\item[balance（余额）] $\boldsymbol{\sigma}[a]_{\mathrm{b}}$，表示这个账户地址拥有多少 Wei。
-\item[storageRoot（存储根）] 保存了账户的存储内容的 Merkle Patricia 树的根节点的 256 位哈希值，这个树中保存的是 256 位整数键值的 Keccak 256 位哈希值到 256 位整数值的 RLP 编码的映射。这个哈希定义为 $\boldsymbol{\sigma}[a]_s$。
-\item[codeHash（代码哈希）] 这个账户的 EVM 代码哈希值——当这个地址接收到一个消息调用时，这些代码会被执行；它和其它字段不同，创建后不可更改。状态数据库中包含所有这样的代码片段哈希，以便后续使用。这个哈希可以定义为 $\boldsymbol{\sigma}[a]_c$，然后我们用 $\mathbf{b}$ 来表示代码，则有 $\texttt{\small KEC}(\mathbf{b}) = \boldsymbol{\sigma}[a]_c$。
+\item[balance] $\boldsymbol{\sigma}[a]_{\mathrm{b}}$，表示这个账户地址拥有多少 Wei（即账户余额，译者注）。
+\item[storageRoot] 保存了账户的存储内容的 Merkle Patricia 树的根节点的 256 位哈希值，这个树中保存的是 256 位整数键值的 Keccak 256 位哈希值到 256 位整数值的 RLP 编码的映射。这个哈希定义为 $\boldsymbol{\sigma}[a]_s$。
+\item[codeHash] 这个账户的 EVM 代码哈希值——当这个地址接收到一个消息调用时，这些代码会被执行；它和其它字段不同，创建后不可更改。状态数据库中包含所有这样的代码片段哈希，以便后续使用。这个哈希可以定义为 $\boldsymbol{\sigma}[a]_c$，然后我们用 $\mathbf{b}$ 来表示代码，则有 $\texttt{\small KEC}(\mathbf{b}) = \boldsymbol{\sigma}[a]_c$。
 \end{description}
 
 因为我通常希望所指的并不是 Trie 的根哈希，而是其中所保存的键值对集合，所以我做了一个更方便的定义:
@@ -241,7 +242,6 @@ k \in \mathbb{B}_{32} \quad \wedge \quad v \in \mathbb{N}
 
 如果 \textbf{codeHash} 字段是一个空字符串的 Keccak-256 哈希，也就是说 $\boldsymbol{\sigma}[a]_c = \texttt{\small KEC}\big(()\big)$，那么这个节点则表示一个简单账户，有时简称为“非合约”账户。
 
-
 因此我们可以定义一个世界状态函数 $L_{S}$：
 \begin{equation}
 L_{S}(\boldsymbol{\sigma}) \equiv \{ p(a): \boldsymbol{\sigma}[a] \neq \varnothing \}
@@ -260,77 +260,77 @@ p(a) \equiv  \big(\texttt{\small KEC}(a), \texttt{\small RLP}\big( (\boldsymbol{
 \quad v(x) \equiv x_{\mathrm{n}} \in \mathbb{N}_{256} \wedge x_{\mathrm{b}} \in \mathbb{N}_{256} \wedge x_{\mathrm{s}} \in \mathbb{B}_{32} \wedge x_{\mathrm{c}} \in \mathbb{B}_{32}
 \end{equation}
 
-An account is \textit{empty} when it has no code, zero nonce and zero balance:
+如果一个账户没有代码，它将是 \textit{empty}（空的），且 nonce 和 balance 均为 0：
 \begin{equation}
 \mathtt{\tiny EMPTY}(\boldsymbol{\sigma}, a) \quad\equiv\quad \boldsymbol{\sigma}[a]_{\mathrm{c}} = \texttt{\small KEC}\big(()\big) \wedge \boldsymbol{\sigma}[a]_{\mathrm{n}} = 0 \wedge \boldsymbol{\sigma}[a]_{\mathrm{b}} = 0
 \end{equation}
-Even callable precompiled contracts can have an empty account state. This is because their account states do not usually contain the code describing its behavior.
+即使是所谓的预编译合约也可能处于 empty 状态。这是因为它们的账户状态并不总是包含可以表述它们的行为的代码。
 
-An account is \textit{dead} when its account state is non-existent or empty:
+当一个账户的状态不存在或为 empty 时，就表示它 \textit{dead}（死了）：
 \begin{equation}
 \mathtt{\tiny DEAD}(\boldsymbol{\sigma}, a) \quad\equiv\quad \boldsymbol{\sigma}[a] = \varnothing \vee \mathtt{\tiny EMPTY}(\boldsymbol{\sigma}, a)
 \end{equation}
 
 \subsection{交易} \label{ch:transaction}
 
-交易（符号，$T$）是个单一的加密指令，通过以太坊中系统之外的操作者创建。我们假设外部的操作者是人,软件工具用于创建和传播\footnote{显著地，这样的“工具”可以从基于人类行为的初始化中移除---或者人类可能变成有原因的中立---可能有一点他们被视为自治的代理人。例如：合约可能会给人类好处,让人发送交易从而触发合约的执行。}。这里的交易类型有两种：一种是消息调用,另一种通过代码创建新的账户（称为“合约创建”）。两种类型的交易都有的共同字段如下:
+交易（符号，$T$）是个单一的加密学签名的指令，通常由以太坊系统之外的操作者创建。我们假设外部的操作者是人，软件工具则用于构建和散播 \footnote{特别是，这样的“工具”最终将会从基于人类行为的初始化中剥离——或者人类可能变成中立状态——当到达某个临界点时，这种工具可能会被看作一种自治的代理。例如，合约可以向那些发送交易来启动它们的人们提供奖金。}。这里的交易有两种类型：一种表现为消息调用，另一种则通过代码创建新的账户（称为“合约创建”）。这两种类型的交易都有一些共同的字段：
 
 \begin{description}
-\item[nonce,随机数] $T_n$,账户发出的交易数量。
-\item[gasPrice,燃料价格] $T_p$，为执行交易所需要的计算资源付的 \textit{gas} 价格，以 Wei 为单位。
-\item[gasLimit,燃料上限] $T_g$，用于执行交易的最大 gas 数量。 这个值须在交易前设置,且设定后不能再修改。
-\item[to，接收者地址] 消息调用接收者的 160 位地址。对与合约创建交易，无需接收者地址，使用 $\varnothing$ 表示，$\varnothing$ 是 $\mathbb{B}_0$ 的唯一成员。
-\item[value，转账额度] $T_v$，转到接收者账户的额度,以 Wei 为单位。对于合约创建,表示捐赠到合约地址的额度。
-\item[v，r，s] $T_w$，$T_r$ and $T_s$,和交易签名相关的变量，用于确定交易的发送者。详见附录 \ref{app:signing}。
+\item[nonce]\linkdest{tx_nonce}{} 由交易发送者发出的的交易的数量，由 $T_{\mathrm{n}}$ 表示。
+\item[gasPrice]\linkdest{tx_gas_price_T__p}{} 为执行这个交易所需要进行的计算步骤消耗的每单位 \textit{gas} 的价格，以 Wei 为单位，由 $T_{\mathrm{p}}$ 表示。
+\item[gasLimit]\linkdest{tx_gas_limit_T__g}{} 用于执行这个交易的最大 gas 数量。这个值须在交易开始前设置，且设定后不能再增加，由 $T_{\mathrm{g}}$ 表示。
+\item[to]\linkdest{tx_to_address_T__t}{} 160 位的消息调用接收者地址；对与合约创建交易，用 $\varnothing$ 表示 $\mathbb{B}_0$ 的唯一成员。此字段由 $T_{\mathrm{t}}$ 表示
+\item[value]\linkdest{tx_value_T__v}{} 转移到接收者账户的 Wei 的数量；对于合约创建，则代表给新建合约地址的捐款。由 $T_{\mathrm{v}}$ 表示。
+\item[v，r，s] 与交易签名相符的若干数值，用于确定交易的发送者，由 \linkdest{T__w_T__r_T__s}{$T_{\mathrm{w}}$，$T_{\mathrm{r}}$ 和 $T_{\mathrm{s}}$ 表示}。详见附录 \ref{app:signing}。
 \end{description}
 
 此外，合约创建还包含以下字段:
 
 \begin{description}
-\item[init,初始化] $T_\mathbf{i}$，一个不限制大小的字节数组,表示账户初始化程序的EVM代码。
+\item[init] 一个不限制大小的字节数组，用来指定账户初始化程序的 EVM 代码，由 $T_{\mathbf{i}}$ 表示。
 \end{description}
 
-\textbf{init} 是EVM代码片段; 执行 init后会返回另外一个代码片段，每次合约接受消息调用(通过交易或内部调用)后都会执行这个代码片段。 仅当合约账户创建时会执行一次 \textbf{init}。
+\textbf{init} 是 EVM 代码片段；它将返回 \textbf{body}，这是这个账户每次接收到消息调用时会执行的代码（通过一个交易或者代码的内部执行）。\textbf{init} 代码仅会在合约创建时被执行一次，然后就会被丢弃。
 
-相比之下，一个消息调用的交易包括:
+与此相对，一个消息调用交易包括:
 
 \begin{description}
-\item[data,数据] $T_\mathbf{d}$，一个不限制大小的字节数组，表示消息调用的输入数据。
+\item[data] 一个不限制大小的字节数组，用来指定消息调用的输入数据，由 $T_\mathbf{d}$ 表示。
 \end{description}
 
-附录 \ref{app:signing} 详细描述了映射发送者交易的函数 $S$，通过 SECP-256k1 的 ECDSA 曲线，使用交易(除了最后的3个签名字段)作为数据来签名。目前我们先简单使用 $S(T)$ 表示发送者的指定交易 $T$ 。
+附录 \ref{app:signing} 详细描述了将交易映射到发送者的函数 $S$。这种映射通过 SECP-256k1 曲线的 ECDSA 算法实现，使用交易哈希（除去后 3 个签名字段）作为数据来进行签名。目前我们先简单地使用 $S(T)$ 表示指定交易 $T$ 的发送者。
 
 \begin{equation}
-L_T(T) \equiv \begin{cases}
-(T_n, T_p, T_g, T_t, T_v, T_\mathbf{i}, T_w, T_r, T_s) & \text{if} \; T_t = \varnothing\\
-(T_n, T_p, T_g, T_t, T_v, T_\mathbf{d}, T_w, T_r, T_s) & \text{otherwise}
+L_{T}(T) \equiv \begin{cases}
+(T_{\mathrm{n}}, T_{\mathrm{p}}, T_{\mathrm{g}}, T_{\mathrm{t}}, T_{\mathrm{v}}, T_{\mathbf{i}}, T_{\mathrm{w}}, T_{\mathrm{r}}, T_{\mathrm{s}}) & \text{if} \; T_{\mathrm{t}} = \varnothing\\
+(T_{\mathrm{n}}, T_{\mathrm{p}}, T_{\mathrm{g}}, T_{\mathrm{t}}, T_{\mathrm{v}}, T_{\mathbf{d}}, T_{\mathrm{w}}, T_{\mathrm{r}}, T_{\mathrm{s}}) & \text{otherwise}
 \end{cases}
 \end{equation}
 
-在这里,我们假设所有变量都是 RLP 编码的整数，除了2个任意长度的字节数组 $T_\mathbf{i}$ 和 $T_\mathbf{d}$。
-
+在这里，我们假设除了任意长度的字节数组 $T_{\mathbf{i}}$ 和 $T_{\mathbf{d}}$ 以外，所有变量都是作为整数来进行 RLP 编码的。
 \begin{equation}
 \begin{array}[t]{lclclc}
-T_n \in \mathbb{P}_{256} & \wedge & T_v \in \mathbb{P}_{256} & \wedge & T_p \in \mathbb{P}_{256} & \wedge \\
-T_g \in \mathbb{P}_{256} & \wedge & T_w \in \mathbb{P}_5 & \wedge & T_r \in \mathbb{P}_{256} & \wedge \\
-T_s \in \mathbb{P}_{256} & \wedge & T_\mathbf{d} \in \mathbb{B} & \wedge & T_\mathbf{i} \in \mathbb{B}
+T_{\mathrm{n}} \in \mathbb{N}_{256} & \wedge & T_{\mathrm{v}} \in \mathbb{N}_{256} & \wedge & T_{\mathrm{p}} \in \mathbb{N}_{256} & \wedge \\
+T_{\mathrm{g}} \in \mathbb{N}_{256} & \wedge & T_{\mathrm{w}} \in \mathbb{N}_5 & \wedge & T_{\mathrm{r}} \in \mathbb{N}_{256} & \wedge \\
+T_{\mathrm{s}} \in \mathbb{N}_{256} & \wedge & T_{\mathbf{d}} \in \mathbb{B} & \wedge & T_{\mathbf{i}} \in \mathbb{B}
 \end{array}
 \end{equation}
 其中
 \begin{equation}
-\mathbb{P}_n = \{ P: P \in \mathbb{P} \wedge P < 2^n \}
+\mathbb{N}_{\mathrm{n}} = \{ P: P \in \mathbb{N} \wedge P < 2^n \}
 \end{equation}
 
-地址哈希 $T_\mathbf{t}$ 稍微有些不同:它是一个 20 字节的地址哈希值，但创建合约时它是RLP空字节系列，使用 $\mathbb{B}_0$ 表示：
+地址哈希 $T_{\mathbf{t}}$ 稍微有些不同：它是一个 20 字节的地址哈希值，或者当创建合约时（将等于 $\varnothing$）是 RLP 空字节序列，所以是 $\mathbb{B}_0$ 的成员：
 \begin{equation}
-T_\mathbf{t} \in \begin{cases} \mathbb{B}_{20} & \text{if} \quad T_t \neq \varnothing \\
+T_{\mathbf{t}} \in \begin{cases} \mathbb{B}_{20} & \text{if} \quad T_{\mathrm{t}} \neq \varnothing \\
 \mathbb{B}_{0} & \text{otherwise}\end{cases}
 \end{equation}
 
-\subsection{区块} \label{ch:block}
+\subsection{The Block}\linkdest{block}\label{subsec:The_Block}
 
 在以太坊中，区块是相关信息的集合。与区块头 $H$ 想对应的交易信息为 $\mathbf{T}$，其它区块头数据的集合 $\mathbf{U}$ 表示它的父级区块中有和当前区块的爷爷辈区块是相同的。（这样的区块称为 \textit{ommers}\footnote{\textit{ommer} 的意思和自然界中的“父母的兄弟姐妹”最相近，参见 \url{https://nonbinary.miraheze.org/wiki/Gender_neutral_language\#Aunt.2FUncle}}）。区块头包含的的信息如下：
 
+%\textit{TODO: Introduce logs}
 
 \begin{description}
 \item[parentHash，父块哈希] $H_p$,父区块头的 Keccak 256位哈希。
@@ -610,7 +610,7 @@ T_g & \leqslant & {B_H}_l - \ell(B_\mathbf{R})_u
 \end{equation}
 
 
-注意最后的条件: 交易燃料限制 $T_g$  <= 这个区块的燃料限制 ${B_H}_l$ - 这个区块之前的所有交易已使用的燃料 $\ell(B_\mathbf{R})_u$  。
+注意最后的条件: 交易燃料限制 $T_{\mathrm{g}}$ <= 这个区块的燃料限制 ${B_H}_l$ - 这个区块之前的所有交易已使用的燃料 $\ell(B_\mathbf{R})_u$  。
 
 
 有效交易的执行起始于一个对状态不能撤回的改变：发送者账户 $S(T)$ 的随机数会加1，账户余额扣减部分预付费用 $T_gT_p$。计算过程中有效的燃料 $g$ = $T_g - g_0$。无论是合约创建还是消息调用后的的最终状态（可能等于当前的状态），这个改变是确定的且从来没有无效的:从这个观点看不会存在无效的交易。
