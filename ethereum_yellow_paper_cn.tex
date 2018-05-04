@@ -64,7 +64,6 @@
 
 \section{简介}\label{sec:introduction}
 
-
 随着互联网连接了世界上绝大多数地方，全球信息共享的成本越来越低。比特币网络通过共识机制、自愿遵守的社会合约，实现了一个去中心化的价值转移系统且可以在全球范围内自由使用，这样的技术改革展示了它的巨大力量。这样的系统可以说是加密安全、基于交易的状态机的一种具体应用。尽管还很简陋，但类似域名币（Namecoin）这样的后续系统，把这种技术从最初的“货币应用”发展到了其它领域。
 
 以太坊是一个尝试达到通用性的技术项目，可以构建任何基于交易的状态机。而且以太坊致力于为开发者提供一个紧密整合的端到端系统，这个系统提供了一种可信对象消息传递计算框架（a trustful object messaging compute framework），使开发者可以用一种前所未有的计算范式来构建软件。
@@ -73,11 +72,9 @@
 
 这个项目有很多目标，其中最重要的目标是为了促成那些本来无法信任对方的个体之间的交易。这种不信任可能是因为地理上的分隔、对接的困难，或者是不兼容、不称职、不情愿、费用、不确定、不方便，或现有法律系统的腐败。于是我们想用一个丰富且清晰的语言去实现一个状态变化的系统，期望协议可以自动被执行，我们可以为此提供一种实现方式。
 
-
 这里所提议的系统中的交易，有一些在现实世界中并不常见的属性。公允的裁判通常很难找到，但无私的算法解释器却可以天然地提供这种特性。自然语言必然是模糊的，会导致信息的缺失，同时那些平白的、旧有的成见很难被动摇，所以透明性，或者说通过交易日志和规则或代码指令来清晰地查看状态变化或者裁判结果的能力，在基于人来构建的系统中从来无法完美实现。
 
 总的来说，我希望能提供一个系统，来给用户提供一些保证：无论是与其他个体、系统还是组织进行交互，他们都能完全信任可能的结果以及产生结果的过程。
-
 
 \subsection{前人工作} \label{ch:previous}
 
@@ -86,7 +83,6 @@
 \cite{dwork92pricingvia} 第一次提出了使用计算开销的密码学证明（“proof-of-work”，即工作量证明）来作为在互联网上传递价值信号的一种手段。这里所使用的价值信号，是作为对抗垃圾邮件的震慑机制的，并不是任何形式的货币；但这却极大地论证了一种承载强大的经济信号的基本数据通道的潜在可能，这种通道允许数据接受者不依赖任何信任就可以做出物理断言。\cite{back2002hashcash} 后来设计了一个类似的系统。
 
 \cite{vishnumurthy03karma:a} 最早使用工作量证明作为强大的经济信号保证货币安全。在这个案例中，代币被用来在点到点（peer-to-peer）文件交易中检查并确保“消费者”可以向服务“提供商”进行小额支付。通过在工作量证明中增加数字签名和账本，一种新的安全模型产生了。这种模型是为了防止历史记录被篡改，并使恶意用户无法伪造交易或者不公平的抗议服务的交付。五年后（2008年），中本聪 \cite{nakamoto2008bitcoin} 引入了另一种更广泛的工作量证明安全价值代币。这个项目的成果就是比特币，它也成为了第一个被广泛认可的全球化去中心化交易账本。
-
 
 由于比特币的成功，竞争币（alt-coins）开始兴起。通过修改比特币的协议，人们创建了许多其他的数字货币。比较知名的有莱特币（Litecoin）和素数币（Primecoin），参见 \cite{sprankel2013technical} 。一些项目使用比特币的核心机制并重新改造以应用在其它领域，例如域名币（Namecoin）致力于提供一个去中心化的名称解析系统，参见 \cite{aron2012bitcoin} 。
 
@@ -97,6 +93,7 @@
 \cite{szabo1997formalizing} 和 \cite{miller1997future} 进行了智能合约（smart contract）的早期工作。大约在上世纪 90 年代，人们逐渐认识到协议算法的执行可以成为人类合作的重要力量。虽然当时没有这样的系统，但可以表明法律的未来发展将会受到这种系统的影响。就此而言，以太坊或许可以视为这种加密-法律（cypto-law）系统的一种通用实现。
 
 %E language?
+本文中所使用的术语列表，请参考附录 \ref{ch:Terminology}。
 
 \section{区块链范式} \label{ch:overview}
 
@@ -104,7 +101,6 @@
 \begin{equation}
 \boldsymbol{\sigma}_{t+1} \equiv \Upsilon(\boldsymbol{\sigma}_t, T)
 \end{equation}
-
 
 $\Upsilon$ 是以太坊状态转换函数。在以太坊中，$\Upsilon$ 和 $\boldsymbol{\sigma}$ 比已有的任何比较系统都强; $\Upsilon$ 可以执行任意计算，而 $\boldsymbol{\sigma}$ 可以储存交易中的任意状态。
 
@@ -122,7 +118,6 @@ B & \equiv & (..., (T_0, T_1, ...) ) \\
 其中 $\Omega$ 是区块定稿状态转换函数（这个函数奖励一个特定的账户）；$B$ 表示一个区块，包含一系列交易作为其组成部分；$\Pi$ 是区块级的状态转换函数。
 
 这就是区块链范式的基础，这个模型不仅是以太坊的基础，还是迄今为止所有基于共识的去中心化交易系统的基础。
-
 
 \subsection{面值}
 
@@ -150,7 +145,6 @@ $10^{18}$ & Ether（以太） \\
 因为这是一个去中心化的系统，所有人都有机会在之前的某一个区块之后创建新的区块，这必然会形成一个区块树。为了能在这个区块树上从根节点（创世区块）到叶节点（包含最新交易的区块）形成一个一致的区块链，必须有一个共识方案。如果各个节点所认为的从根节点到叶节点的路径（最佳区块链）不同，那么就会发生分叉。
 
 这就意味着在一个给定的时间点，系统中会有多个状态共存：一些节点相信一个区块包含权威的交易，其它节点则相信另外的区块包含权威的交易，其中就包含彻底不同或者不兼容的交易。必须要不惜一切代价避免这点，因为它会破坏整个系统信用。
-
 
 我们使用了一个简易的 GHOST 协议版本来达成共识，参见 \cite{cryptoeprint:2013:881}。我们会在第 \ref{ch:ghost} 章中详细说明。
 
@@ -184,18 +178,15 @@ $10^{18}$ & Ether（以太） \\
 
 以上，我定义了大量的函数。一个最常见的函数是 $\ell$，它表示给定序列中的最后一个条目：
 
-
 \begin{equation}
 \ell(\mathbf{x}) \equiv \mathbf{x}[\lVert \mathbf{x} \rVert - 1]
 \end{equation}
-
 
 \section{区块、状态和交易} \label{ch:bst}
 
 在介绍了以太坊的基本概念之后，我们将详细地讨论交易、区块和状态的含义。
 
 \subsection{世界状态} \label{ch:state}
-
 
 世界状态（state）是在地址（160 位的标识符）和账户状态（序列化为 RLP 的数据结构，详见附录 \ref{app:rlp}）的映射。虽然世界状态没有直接储存在区块链上，但会假定在实施过程中会将这个映射维护在一个修改过的 Merkle Patricia 树上（即 trie，详见附录 \ref{app:trie}）。这个 trie 需要一个简单的后端数据库去维护字节数组到字节数组的映射；我们称这个后端数据库为状态数据库。它有一系列的好处: 第一，这个结构的根节点是基于密码学依赖于所有内部数据的，它的哈希可以作为整个系统状态的一个安全标识；第二，作为一个不变的数据结构，我们可以通过简单地改变根节点哈希来召回任何一个先前的状态（在根节点哈希已知的条件下）。因为我们在区块链中储存了所以这样的根节点哈希值，所以我们可以很容易地恢复到特定的历史状态。
 
@@ -207,44 +198,43 @@ $10^{18}$ & Ether（以太） \\
 \item[codeHash（代码哈希）] 这个账户的 EVM 代码哈希值——当这个地址接收到一个消息调用时，这些代码会被执行；它和其它字段不同，创建后不可更改。状态数据库中包含所有这样的代码片段哈希，以便后续使用。这个哈希可以定义为 $\boldsymbol{\sigma}[a]_c$，然后我们用 $\mathbf{b}$ 来表示代码，则有 $\texttt{\small KEC}(\mathbf{b}) = \boldsymbol{\sigma}[a]_c$。
 \end{description}
 
-
-因为我通常希望所指的并不是字典树树的根哈希,而是所保存的键值对集合，我做了一个更方便的定义:
+因为我通常希望所指的并不是 Trie 的根哈希，而是其中所保存的键值对集合，所以我做了一个更方便的定义:
 
 \begin{equation}
 \texttt{\small TRIE}\big(L_I^*(\boldsymbol{\sigma}[a]_\mathbf{s})\big) \equiv \boldsymbol{\sigma}[a]_s
 \end{equation}
 
-字典树中的键值对集合函数，$L_I^*$，定义为基于基础函数 $L_I$ 的元素转换:
+Trie 中的键值对集合函数 $L_I^*$ 被定义为适用于基础函数 $L_I$ 中所有元素的变换：
 \begin{equation}
 L_I\big( (k, v) \big) \equiv \big(\texttt{\small KEC}(k), \texttt{\small RLP}(v)\big)
 \end{equation}
 
-其中:
+其中：
 \begin{equation}
 k \in \mathbb{B}_{32} \quad \wedge \quad v \in \mathbb{P}
 \end{equation}
 
-需要说明的是,$\boldsymbol{\sigma}[a]_\mathbf{s}$ 不应算作这个账户的"物理"成员，它不参与序列化。
+需要说明的是，$\boldsymbol{\sigma}[a]_\mathbf{s}$ 不应算作这个账户的“物理”成员，它不会参与之后的序列化。
 
-如果 \textbf{codeHash} 字段是一个空字符串的 Keccak-256 哈希，例如 $\boldsymbol{\sigma}[a]_c = \texttt{\small KEC}\big(()\big)$，则表示对应的节点表示一个简单账户，有时简称非合约账户。
+如果 \textbf{codeHash} 字段是一个空字符串的 Keccak-256 哈希，也就是说 $\boldsymbol{\sigma}[a]_c = \texttt{\small KEC}\big(()\big)$，那么这个节点则表示一个简单账户，有时简称为“非合约”账户。
 
 
-因此我们可能定义一个世界状态函数 $L_S$：
+因此我们可以定义一个世界状态函数 $L_S$：
 
 \begin{equation}
 L_S(\boldsymbol{\sigma}) \equiv \{ p(a): \boldsymbol{\sigma}[a] \neq \varnothing \}
 \end{equation}
-where
+其中
 \begin{equation}
 p(a) \equiv  \big(\texttt{\small KEC}(a), \texttt{\small RLP}\big( (\boldsymbol{\sigma}[a]_n, \boldsymbol{\sigma}[a]_b, \boldsymbol{\sigma}[a]_s, \boldsymbol{\sigma}[a]_c) \big) \big)
 \end{equation}
 
-函数 $L_S$ 和 字典树函数是为了提供一个世界状态的简短身份（哈希）。我们假定：
+函数 $L_S$ 和 Trie 函数一起用来提供一个世界状态的简短标识（哈希）。我们假定：
 \begin{equation}
 \forall a: \boldsymbol{\sigma}[a] = \varnothing \; \vee \; (a \in \mathbb{B}_{20} \; \wedge \; v(\boldsymbol{\sigma}[a]))
 \end{equation}
 
-$v$ 是账户合法性验证函数:
+其中，$v$ 是账户有效性验证函数：
 \begin{equation}
 \quad v(x) \equiv x_n \in \mathbb{P}_{256} \wedge x_b \in \mathbb{P}_{256} \wedge x_s \in \mathbb{B}_{32} \wedge x_c \in \mathbb{B}_{32}
 \end{equation}
