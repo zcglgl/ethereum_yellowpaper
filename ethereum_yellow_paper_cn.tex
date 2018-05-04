@@ -180,13 +180,13 @@ $10^{18}$ & Ether（以太） \\
 
 有两个高度结构化的顶层状态值，用粗体小写希腊字母 $\boldsymbol{\sigma}$ 表示世界状态（world-state）；用 $\boldsymbol{\mu}$ 表示机器状态（machine-state）。
 
-作用在高度结构化数据上的函数，使用大写的希腊字母，例如：$\Upsilon$，是以太坊中的状态转换函数。
+作用在高度结构化数据上的函数，使用大写的希腊字母，例如：\hyperlink{Upsilon_state_transition}{$\Upsilon$}，是以太坊中的状态转换函数。
 
-对于大部分函数来说，通常用一个大写的字母表示，例如：$C$ 是总体费用函数。此外，可能会使用下角标表示一些特别的变量，例如：$C_\text{\tiny SSTORE}$ 是执行 {\tiny SSTORE} 操作的费用函数。对于一些可能是外部定义的函数，我可能会使用打印机文字字体，例如使用 $\texttt{KEC}$ 来表示 $\texttt{KEC512}$ 哈希函数。$\texttt{KEC512}$ 表示 Keccack-512 哈希函数。
+对于大部分函数来说，通常用一个大写的字母表示，例如：$C$ 是总体费用函数。此外，可能会使用下角标表示一些特别的变量，例如：\hyperlink{C__SSTORE}{$C_\text{SSTORE}$} 是执行 \hyperlink{SSTORE}{{\tiny SSTORE}} 操作的费用函数。对于一些可能是外部定义的函数，我可能会使用打印机文字字体，例如使用 $\texttt{KEC}$ （一般指单纯的 Keccak）来表示 Keccak-256 哈希函数（这是由 \cite{Keccak} 提出的，在 SHA-3 竞争中获胜的那种算法，而不是最新的版本）。也会用 $\texttt{KEC512}$ 来表示 Keccack-512 哈希函数。
 
-元组通常使用一个大写字母来表示，例如用 $T$ 表示一个以太坊交易。也可以通过使用下标来表示其中的一个独立组成部分，例如用 $T_n$ 来表示交易的 nonce。下角标形式则用于表示它们的类型；例如：大写的下角标表示下角标所对应的组成部分所构成的元组。
+元组通常使用一个大写字母来表示，例如用 $T$ 表示一个以太坊交易。也可以通过使用下标来表示其中的一个独立组成部分，例如用 \hyperlink{transaction_nonce}{$T_{\mathrm{n}}$} 来表示交易的 nonce。下角标形式则用于表示它们的类型；例如：大写的下角标表示下角标所对应的组成部分所构成的元组。
 
-标量和固定大小的字节序列（或数组）都使用小写字母来表示，例如 $n$ 在本文中表示交易的 nonce。小写的希腊字母一般表示一些特别的含义，例如 $\delta$ 表示在栈上一个给定操作所需要的条目数量。
+标量和固定大小的字节序列（或数组）都使用小写字母来表示，例如 $n$ 在本文中表示 \hyperlink{transaction_nonce}{交易的 nonce}。小写的希腊字母一般表示一些特别的含义，例如 $\delta$ 表示在栈上一个给定操作所需要的条目数量。
 
 任意长度的序列通常用粗体小写字母表示，例如 $\mathbf{o}$ 表示消息调用中输出的字节序列数据。对于特别重要的值，可能会使用粗体大写字母。
 
@@ -198,9 +198,9 @@ $10^{18}$ & Ether（以太） \\
 
 当去考虑现有的变量时，我遵循在给定的范围内去定义的原则，如果我们使用占位符 $\Box$ 表示未修改的“输入”值，那么就可以使用 $\Box'$ 来表示修改过的可用值，$\Box^*$，$\Box^{**}$ \&c 表示中间值。在特殊情况下，为了提高可读性和清晰性，我可能会使用字母-数字下角标表示中间值。
 
-当使用已有的函数时，例如一个给定函数 $f$，函数 $f^*$ 表示一个相似的、对集合中所有元素都生效的函数映射。正式定义参见 \ref{ch:block}。
+当使用已有的函数时，例如一个给定函数 $f$，函数 \hyperlink{general_element_wise_sequence_transformation_f_pow_asterisk}{$f^*$} 表示一个相似的、对集合中所有元素都生效的函数映射。正式定义参见 \hyperlink{block}{\ref{subsec:The_Block}}。
 
-以上，我定义了大量的函数。一个最常见的函数是 $\ell$，它表示给定序列中的最后一个条目：
+以上，我定义了大量的函数。\linkdest{ell}一个最常见的函数是 $\ell$，它表示给定序列中的最后一个条目：
 
 \begin{equation}
 \ell(\mathbf{x}) \equiv \mathbf{x}[\lVert \mathbf{x} \rVert - 1]
@@ -212,12 +212,12 @@ $10^{18}$ & Ether（以太） \\
 
 \subsection{世界状态} \label{ch:state}
 
-世界状态（state）是在地址（160 位的标识符）和账户状态（序列化为 RLP 的数据结构，详见附录 \ref{app:rlp}）的映射。虽然世界状态没有直接储存在区块链上，但会假定在实施过程中会将这个映射维护在一个修改过的 Merkle Patricia 树上（即 trie，详见附录 \ref{app:trie}）。这个 trie 需要一个简单的后端数据库去维护字节数组到字节数组的映射；我们称这个后端数据库为状态数据库。它有一系列的好处: 第一，这个结构的根节点是基于密码学依赖于所有内部数据的，它的哈希可以作为整个系统状态的一个安全标识；第二，作为一个不变的数据结构，我们可以通过简单地改变根节点哈希来召回任何一个先前的状态（在根节点哈希已知的条件下）。因为我们在区块链中储存了所以这样的根节点哈希值，所以我们可以很容易地恢复到特定的历史状态。
+世界状态（\textit{state}）是在地址（160 位的标识符）和账户状态（序列化为 RLP 的数据结构，详见附录 \ref{app:rlp}）的映射。虽然世界状态没有直接储存在区块链上，但会假定在实施过程中会将这个映射维护在一个修改过的 Merkle Patricia 树上（即 \textit{trie}，详见附录 \ref{app:trie}）。这个 trie 需要一个简单的后端数据库去维护字节数组到字节数组的映射；我们称这个后端数据库为状态数据库。它有一系列的好处: 第一，这个结构的根节点是基于密码学依赖于所有内部数据的，它的哈希可以作为整个系统状态的一个安全标识；第二，作为一个不变的数据结构，我们可以通过简单地改变根节点哈希来召回任何一个先前的状态（在根节点哈希已知的条件下）。因为我们在区块链中储存了所以这样的根节点哈希值，所以我们可以很容易地恢复到特定的历史状态。
 
-账户状态包含以下四个字段：
+账户状态 $\boldsymbol{\sigma}[a]$ 包含以下四个字段：
 \begin{description}
-\item[nonce] 这个值等于由此账户地址发出的交易数量，或者由这个账户所创建的合约数量（当这个账户有关联代码时）。$\boldsymbol{\sigma}[a]_n$ 即表示状态 $\boldsymbol{\sigma}$ 中的地址 $a$ 的 nonce 值。
-\item[balance（余额）] $\boldsymbol{\sigma}[a]_b$，表示这个账户地址拥有多少 Wei。
+\item[nonce] \linkdest{account_nonce}这个值等于由此账户地址发出的交易数量，或者由这个账户所创建的合约数量（当这个账户有关联代码时）。$\boldsymbol{\sigma}[a]_n$ 即表示状态 $\boldsymbol{\sigma}$ 中的地址 $a$ 的 nonce 值。
+\item[balance（余额）] $\boldsymbol{\sigma}[a]_{\mathrm{b}}$，表示这个账户地址拥有多少 Wei。
 \item[storageRoot（存储根）] 保存了账户的存储内容的 Merkle Patricia 树的根节点的 256 位哈希值，这个树中保存的是 256 位整数键值的 Keccak 256 位哈希值到 256 位整数值的 RLP 编码的映射。这个哈希定义为 $\boldsymbol{\sigma}[a]_s$。
 \item[codeHash（代码哈希）] 这个账户的 EVM 代码哈希值——当这个地址接收到一个消息调用时，这些代码会被执行；它和其它字段不同，创建后不可更改。状态数据库中包含所有这样的代码片段哈希，以便后续使用。这个哈希可以定义为 $\boldsymbol{\sigma}[a]_c$，然后我们用 $\mathbf{b}$ 来表示代码，则有 $\texttt{\small KEC}(\mathbf{b}) = \boldsymbol{\sigma}[a]_c$。
 \end{description}
@@ -227,7 +227,7 @@ $10^{18}$ & Ether（以太） \\
 \texttt{\small TRIE}\big(L_{I}^*(\boldsymbol{\sigma}[a]_{\mathbf{s}})\big) \equiv \boldsymbol{\sigma}[a]_{\mathrm{s}}
 \end{equation}
 
-Trie 中的键值对集合函数 $L_I^*$ 被定义为适用于基础函数 $L_I$ 中所有元素的变换：
+Trie 中的键值对集合函数 $L_{I}^*$ 被定义为适用于基础函数 $L_{I}$ 中所有元素的变换：
 \begin{equation}
 L_{I}\big( (k, v) \big) \equiv \big(\texttt{\small KEC}(k), \texttt{\small RLP}(v)\big)
 \end{equation}
@@ -242,26 +242,34 @@ k \in \mathbb{B}_{32} \quad \wedge \quad v \in \mathbb{N}
 如果 \textbf{codeHash} 字段是一个空字符串的 Keccak-256 哈希，也就是说 $\boldsymbol{\sigma}[a]_c = \texttt{\small KEC}\big(()\big)$，那么这个节点则表示一个简单账户，有时简称为“非合约”账户。
 
 
-因此我们可以定义一个世界状态函数 $L_S$：
-
+因此我们可以定义一个世界状态函数 $L_{S}$：
 \begin{equation}
-L_S(\boldsymbol{\sigma}) \equiv \{ p(a): \boldsymbol{\sigma}[a] \neq \varnothing \}
+L_{S}(\boldsymbol{\sigma}) \equiv \{ p(a): \boldsymbol{\sigma}[a] \neq \varnothing \}
 \end{equation}
 其中
 \begin{equation}
-p(a) \equiv  \big(\texttt{\small KEC}(a), \texttt{\small RLP}\big( (\boldsymbol{\sigma}[a]_n, \boldsymbol{\sigma}[a]_b, \boldsymbol{\sigma}[a]_s, \boldsymbol{\sigma}[a]_c) \big) \big)
+p(a) \equiv  \big(\texttt{\small KEC}(a), \texttt{\small RLP}\big( (\boldsymbol{\sigma}[a]_{\mathrm{n}}, \boldsymbol{\sigma}[a]_{\mathrm{b}}, \boldsymbol{\sigma}[a]_{\mathrm{s}}, \boldsymbol{\sigma}[a]_{\mathrm{c}}) \big) \big)
 \end{equation}
 
-函数 $L_S$ 和 Trie 函数一起用来提供一个世界状态的简短标识（哈希）。我们假定：
+函数 $L_{S}$ 和 Trie 函数一起用来提供一个世界状态的简短标识（哈希）。我们假定：
 \begin{equation}
 \forall a: \boldsymbol{\sigma}[a] = \varnothing \; \vee \; (a \in \mathbb{B}_{20} \; \wedge \; v(\boldsymbol{\sigma}[a]))
 \end{equation}
-
-其中，$v$ 是账户有效性验证函数：
+\linkdest{account_validity_function_v__x}{}其中，$v$ 是账户有效性验证函数：
 \begin{equation}
-\quad v(x) \equiv x_n \in \mathbb{P}_{256} \wedge x_b \in \mathbb{P}_{256} \wedge x_s \in \mathbb{B}_{32} \wedge x_c \in \mathbb{B}_{32}
+\quad v(x) \equiv x_{\mathrm{n}} \in \mathbb{N}_{256} \wedge x_{\mathrm{b}} \in \mathbb{N}_{256} \wedge x_{\mathrm{s}} \in \mathbb{B}_{32} \wedge x_{\mathrm{c}} \in \mathbb{B}_{32}
 \end{equation}
 
+An account is \textit{empty} when it has no code, zero nonce and zero balance:
+\begin{equation}
+\mathtt{\tiny EMPTY}(\boldsymbol{\sigma}, a) \quad\equiv\quad \boldsymbol{\sigma}[a]_{\mathrm{c}} = \texttt{\small KEC}\big(()\big) \wedge \boldsymbol{\sigma}[a]_{\mathrm{n}} = 0 \wedge \boldsymbol{\sigma}[a]_{\mathrm{b}} = 0
+\end{equation}
+Even callable precompiled contracts can have an empty account state. This is because their account states do not usually contain the code describing its behavior.
+
+An account is \textit{dead} when its account state is non-existent or empty:
+\begin{equation}
+\mathtt{\tiny DEAD}(\boldsymbol{\sigma}, a) \quad\equiv\quad \boldsymbol{\sigma}[a] = \varnothing \vee \mathtt{\tiny EMPTY}(\boldsymbol{\sigma}, a)
+\end{equation}
 
 \subsection{交易} \label{ch:transaction}
 
@@ -359,7 +367,7 @@ R \equiv (R_{\boldsymbol{\sigma}}, R_u, R_b, R_\mathbf{l})
 
 函数 $L_R$ 是一个将交易收据转换为 RLP 编码的预处理函数:
 \begin{equation}
-L_R(R) \equiv (\mathtt{\small TRIE}(L_S(R_{\boldsymbol{\sigma}})), R_u, R_b, R_\mathbf{l})
+L_R(R) \equiv (\mathtt{\small TRIE}(L_{S}(R_{\boldsymbol{\sigma}})), R_u, R_b, R_\mathbf{l})
 \end{equation}
 
 交易后状态 $R_{\boldsymbol{\sigma}}$ 会编码到一个字典树中，字典树的根节点组成了第一个条目。
@@ -400,7 +408,7 @@ m(\mathbf{x}, i) &\equiv& \mathtt{\tiny KEC}(\mathbf{x})[i, i + 1] \bmod 2048
 
 \begin{equation}
 \begin{array}[t]{lclc}
-H_r &\equiv& \mathtt{\small TRIE}(L_S(\Pi(\boldsymbol{\sigma}, B))) & \wedge \\
+H_r &\equiv& \mathtt{\small TRIE}(L_{S}(\Pi(\boldsymbol{\sigma}, B))) & \wedge \\
 H_o &\equiv& \mathtt{\small KEC}(\mathtt{\small RLP}(L_H^*(B_\mathbf{U}))) & \wedge \\
 H_t &\equiv& \mathtt{\small TRIE}(\{\forall i < \lVert B_\mathbf{T} \rVert, i \in \mathbb{P}: p(i, L_T(B_\mathbf{T}[i]))\}) & \wedge \\
 H_e &\equiv& \mathtt{\small TRIE}(\{\forall i < \lVert B_\mathbf{R} \rVert, i \in \mathbb{P}: p(i, L_R(B_\mathbf{R}[i]))\}) & \wedge \\
@@ -415,10 +423,10 @@ p(k, v) \equiv \big( \mathtt{\small RLP}(k), \mathtt{\small RLP}(v) \big)
 
 此外:
 \begin{equation}
-\mathtt{\small TRIE}(L_S(\boldsymbol{\sigma})) = {P(B_H)_H}_r
+\mathtt{\small TRIE}(L_{S}(\boldsymbol{\sigma})) = {P(B_H)_H}_r
 \end{equation}
 
-$\texttt{\small TRIE}(L_S(\boldsymbol{\sigma}))$ 是包含以RLP编码的状态 $\boldsymbol{\sigma}$ 键值对的 Merkle Patricia 树根节点哈希，$P(B_H)$ 是父节点。
+$\texttt{\small TRIE}(L_{S}(\boldsymbol{\sigma}))$ 是包含以RLP编码的状态 $\boldsymbol{\sigma}$ 键值对的 Merkle Patricia 树根节点哈希，$P(B_H)$ 是父节点。
 
 这些值根据交易计算产生，特别是交易收据 $B_\mathbf{R}$,这个通过交易状态累积函数 $\hyperlink{Pi}{\Pi}$ 定义，在 \ref{sec:statenoncevalidation} 会详细说明。
 
@@ -543,7 +551,7 @@ V(H) & \equiv &  n \leqslant \frac{2^{256}}{H_d} \wedge m = H_m \quad \wedge \\
 
 \section{交易执行} \label{ch:transactions}
 
-交易执行是以太坊协议中最复杂的部分：它定义了状态转换函数 $\Upsilon$。所有交易在执行时,都要先通过内部的有效性测试,这些包含：
+交易执行是以太坊协议中最复杂的部分：它定义了状态转换函数 \hyperlink{Upsilon_state_transition}{$\Upsilon$}。所有交易在执行时,都要先通过内部的有效性测试,这些包含：
 \begin{enumerate}
 \item 交易是 RLP 格式数据，没有多余的后缀字节；
 \item 交易的签名是有效的；
@@ -552,7 +560,7 @@ V(H) & \equiv &  n \leqslant \frac{2^{256}}{H_d} \wedge m = H_m \quad \wedge \\
 \item 发送者账户的余额至少大于费用 $v_0$,需要提前支付。
 \end{enumerate}
 
-$T$ 表示交易，$\boldsymbol{\sigma}$ 表示状态，状态转移函数 $\Upsilon$ 如下:
+$T$ 表示交易，$\boldsymbol{\sigma}$ 表示状态，状态转移函数 \hyperlink{Upsilon_state_transition}{$\Upsilon$} 如下:
 \begin{equation}
 \boldsymbol{\sigma}' = \Upsilon(\boldsymbol{\sigma}, T)
 \end{equation}
@@ -1083,11 +1091,11 @@ $B(H)$ 表示对应的区块头 $H$.
 \begin{equation}
 \Gamma(B) \equiv \begin{cases}
 \boldsymbol{\sigma}_0 & \text{if} \quad P(B_H) = \varnothing \\
-\boldsymbol{\sigma}_i: \mathtt{\small TRIE}(L_S(\boldsymbol{\sigma}_i)) = {P(B_H)_H}_r & \text{otherwise}
+\boldsymbol{\sigma}_i: \mathtt{\small TRIE}(L_{S}(\boldsymbol{\sigma}_i)) = {P(B_H)_H}_r & \text{otherwise}
 \end{cases}
 \end{equation}
 
-其中，$\mathtt{\small TRIE}(L_S(\boldsymbol{\sigma}_i))$ 表示状态 $\boldsymbol{\sigma}_i$ 对应字典树根节点的哈希;执行时会将其保存在状态数据库中,字典树结构天生不易变,所以它是高效的。
+其中，$\mathtt{\small TRIE}(L_{S}(\boldsymbol{\sigma}_i))$ 表示状态 $\boldsymbol{\sigma}_i$ 对应字典树根节点的哈希;执行时会将其保存在状态数据库中,字典树结构天生不易变,所以它是高效的。
 
 最后定义区块转换函数 $\Phi$，映射了一个不完整区块 \hyperlink{block}{$B$} 到一个完整的区块 $B'$：
 \begin{eqnarray}
@@ -1098,7 +1106,7 @@ B^* & \equiv & B \quad \text{except:} \quad B^*_r = r(\Pi(\Gamma(B), B))
 \end{eqnarray}
 其中 $\mathbf{d}$ 是一个数据集, 详见附录 \ref{app:ethash}。
 
-就像在本文开始定义的那样,$\hyperlink{Pi}{\Pi}$ 是状态转换函数，通过区块定稿函数 \hyperlink{Omega}{$\Omega$} 和交易演变函数 $\Upsilon$ 去定义 $\hyperlink{Pi}{\Pi}$。
+就像在本文开始定义的那样,$\hyperlink{Pi}{\Pi}$ 是状态转换函数，通过区块定稿函数 \hyperlink{Omega}{$\Omega$} 和交易演变函数 \hyperlink{Upsilon_state_transition}{$\Upsilon$} 去定义 $\hyperlink{Pi}{\Pi}$。
 
 之前的定义中，$\mathbf{R}[n]_{\boldsymbol{\sigma}}$, $\mathbf{R}[n]_\mathbf{l}$ 和 $\mathbf{R}[n]_u$，表示第 n 个对应的状态、日志和累计使用的燃料（在元组中的第四个元素 $\mathbf{R}[n]_b$，之前以日志条目去定义）。前者简单定义为通过对之前的交易状态执行交易得到新的结果状态（如果是第一个交易，之前的交易状态为创始块的状态）:
 
