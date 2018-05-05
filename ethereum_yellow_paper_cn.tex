@@ -356,42 +356,46 @@ B \equiv (B_{H}, B_{\mathbf{T}}, B_{\mathbf{U}})
 
 \subsubsection{交易收据}\linkdest{Transaction_Receipt}{}
 
-为了让交易信息编码能有利于零知识证明、索引、搜索，我们将每个包含一定信息的交易收据进行编码。以 $B_\mathbf{R}[i]$ 表示第 $i$ 个交易,保存在一个索引字典树中,$H_e$ 是这个字典树的根节点。
+为了能使交易信息对零知识证明、索引和搜索都是有用的，我们将每个交易执行过程中的一些特定信息编码为交易收据。
+我们以 $B_{\mathbf{R}}[i]$ 表示第 $i$ 个交易的收据，并把收据信息保存在一个以索引为键的树（index-keyed \hyperlink{trie}{trie}）中，树的根节点用 \hyperlink{Receipts_Root_H__e}{$H_{\mathrm{e}}$} 保存到区块头中。
 
-交易收据是一个包含四个条目的元组：交易后的状态 $R_{\boldsymbol{\sigma}}$；当前区块中交易累计燃料使用量 $R_u$，交易发生后会立即更新这个值;交易执行过程中创建的日志集合 $R_\mathbf{l}$；和日志 Bloom 过滤器 $R_b$ ：
-
+\linkdest{transaction_receipt_R}{}\linkdest{tx_receipt_gas_used_R__u}{}\linkdest{R__u}交易收据 $R$ 是一个包含四个条目的元组：包含交易收据的区块中当交易发生后的累积 gas 使用量 $R_{\mathrm{u}}$；交易过程中创建的日志集合 $R_{\mathrm{l}}$；由这些日志信息所构成的 Bloom 过滤器 $R_{\mathrm{b}}$ 和交易的状态代码 $R_{\mathrm{z}}$：
 \begin{equation}
-R \equiv (R_{\boldsymbol{\sigma}}, R_u, R_b, R_\mathbf{l})
+R \equiv (R_{\mathrm{u}}, R_{\mathrm{b}}, R_{\mathbf{l}}, R_{\mathrm{z}})
 \end{equation}
 
-函数 $L_R$ 是一个将交易收据转换为 RLP 编码的预处理函数:
+\hypertarget{transaction_receipt_preparation_function_for_RLP_serialisation}{}\linkdest{L__R}函数 $L_{R}$ 是将交易收据转换为 RLP 序列化字节数组的预处理函数：
 \begin{equation}
-L_R(R) \equiv (\mathtt{\small TRIE}(L_{S}(R_{\boldsymbol{\sigma}})), R_u, R_b, R_\mathbf{l})
+L_{R}(R) \equiv (0 \in \mathbb{B}_{256}, R_{\mathrm{u}}, R_{\mathrm{b}}, R_{\mathbf{l}})
+\end{equation}
+其中，$0 \in \mathbb{B}_{256}$ 代替了先前协议版本中的交易前状态根（the pre-transaction state root）。
+
+\linkdest{R__z_assert}我们推定状态代码 $R_{\mathrm{z}}$ 是一个整数。
+\begin{equation}
+R_{\mathrm{z}} \in \mathbb{N}
 \end{equation}
 
-交易后状态 $R_{\boldsymbol{\sigma}}$ 会编码到一个字典树中，字典树的根节点组成了第一个条目。
-
-我们假定累计的燃料使用量 $R_u$ 是一个正整数，日志Bloom $R_b$ 是2048位(256字节)的哈希:
+\linkdest{R__u_assert}我们推定累积的 gas 使用量 $R_{\mathrm{u}}$ 是一个正整数，且日志的 Bloom $R_{\mathrm{b}}$ 是一个 2048 位（256字节）数据的哈希：
 \begin{equation}
-R_u \in \mathbb{P} \quad \wedge \quad R_b \in \mathbb{B}_{256}
+R_{\mathrm{u}} \in \mathbb{N} \quad \wedge \quad R_{\mathrm{b}} \in \mathbb{B}_{256}
 \end{equation}
 
+%Notably $B_{\mathbf{T}}$ does not get serialised into the block by the block preparation function $L_{B}$; it is merely a convenience equivalence.
 
-$R_\mathbf{l}$ 是一系列的日志入口，例如 $(O_0, O_1, ...)$。 一个日志入口 $O$ 是一个日志记录器的地址 $O_a$ 的元组，$O_\mathbf{t}$ 是一系列32字节的日志主题，$O_\mathbf{d}$ 是一些字节数据:
+$R_{\mathbf{l}}$ 是一系列的日志项 $(O_0, O_1, ...)$。一个日志项 $O$ 是一个记录了日志产生者的地址 $O_a$；一系列 32 字节的日志主题 $O_{\mathbf{t}}$ 和一些字节数据 $O_{\mathbf{d}}$ 所组成的元组：
 \begin{equation}
-O \equiv (O_a, ({O_\mathbf{t}}_0, {O_\mathbf{t}}_1, ...), O_\mathbf{d})
+O \equiv (O_{\mathrm{a}}, ({O_{\mathbf{t}}}_0, {O_{\mathbf{t}}}_1, ...), O_{\mathbf{d}})
 \end{equation}
 \begin{equation}
-O_a \in \mathbb{B}_{20} \quad \wedge \quad \forall_{t \in O_\mathbf{t}}: t \in \mathbb{B}_{32} \quad \wedge \quad O_\mathbf{d} \in \mathbb{B}
+O_{\mathrm{a}} \in \mathbb{B}_{20} \quad \wedge \quad \forall_{t \in O_{\mathbf{t}}}: t \in \mathbb{B}_{32} \quad \wedge \quad O_{\mathbf{d}} \in \mathbb{B}
 \end{equation}
 
-我们定义 Bloom 过滤器函数 $M$ 将一个日志入口转换为一个 256 字节哈希:
+我们定义 Bloom 过滤器函数 $M$ 将一个日志项精简为一个 256 字节哈希：
 \begin{equation}
-M(O) \equiv \bigvee_{t \in \{O_a\} \cup O_\mathbf{t}} \big( M_{3:2048}(t) \big)
+M(O) \equiv \hyperlink{bigvee}{\bigvee}_{t \in \{O_{\mathrm{a}}\} \cup O_{\mathbf{t}}} \big( M_{3:2048}(t) \big)
 \end{equation}
 
-
-其中 $M_{3:2048}$ 是一个特别的 Bloom 过滤器,针对任意一个字节序列,它舍弃这个 2048 位字节序列的前三位。它通过对一个字节序列的 Keccak-256 哈希的每一个前三对字节取其的低11位来实现:
+其中 $M_{3:2048}$ 是一个特别的 Bloom 过滤器，它通过设置 2048 位中的 3 位数值来给定一个随机的字节序列。这是通过取得对一个字节序列中的前 3 对字节的 Keccak-256 哈希值的低位 11 位数据实现的\footnote{11 位 2 进制数值 $= 2^{2048}$，其低位的 11 位数值也就是对操作数进行模 2048 的运算结果，这就是“取得对一个字节序列中的前 3 对字节的 Keccak-256 哈希值的低位 11 位数据”的情况。}：
 \begin{eqnarray}
 M_{3:2048}(\mathbf{x}: \mathbf{x} \in \mathbb{B}) & \equiv & \mathbf{y}: \mathbf{y} \in \mathbb{B}_{256} \quad \text{where:}\\
 \mathbf{y} & = & (0, 0, ..., 0) \quad \text{except:}\\
@@ -399,7 +403,7 @@ M_{3:2048}(\mathbf{x}: \mathbf{x} \in \mathbb{B}) & \equiv & \mathbf{y}: \mathbf
 m(\mathbf{x}, i) &\equiv& \mathtt{\tiny KEC}(\mathbf{x})[i, i + 1] \bmod 2048
 \end{eqnarray}
 
-其中 $\mathcal{B}$ 是位引用函数，$\mathcal{B}_j(\mathbf{x})$ 等于字节数组 $\mathbf{x}$ 中的索引 j(从0开始索引) 的位。
+其中 $\mathcal{B}$ 是位引用函数，$\mathcal{B}_{\mathrm{j}}(\mathbf{x})$ 等于字节数组 $\mathbf{x}$ 中的索引 $j$（索引值从 0 开始）的位。
 
 \subsubsection{整体有效性}
 
