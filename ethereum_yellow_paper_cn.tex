@@ -281,7 +281,7 @@ p(a) \equiv  \big(\texttt{\small KEC}(a), \texttt{\small RLP}\big( (\boldsymbol{
 \item[gasLimit]\linkdest{tx_gas_limit_T__g}{} 用于执行这个交易的最大 gas 数量。这个值须在交易开始前设置，且设定后不能再增加，由 $T_{\mathrm{g}}$ 表示。
 \item[to]\linkdest{tx_to_address_T__t}{} 160 位的消息调用接收者地址；对与合约创建交易，用 $\varnothing$ 表示 $\mathbb{B}_0$ 的唯一成员。此字段由 $T_{\mathrm{t}}$ 表示
 \item[value]\linkdest{tx_value_T__v}{} 转移到接收者账户的 Wei 的数量；对于合约创建，则代表给新建合约地址的捐款。由 $T_{\mathrm{v}}$ 表示。
-\item[v，r，s] 与交易签名相符的若干数值，用于确定交易的发送者，由 \linkdest{T__w_T__r_T__s}{$T_{\mathrm{w}}$，$T_{\mathrm{r}}$ 和 $T_{\mathrm{s}}$ 表示}。详见附录 \ref{app:signing}。
+\item[v, r, s] 与交易签名相符的若干数值，用于确定交易的发送者，由 \linkdest{T__w_T__r_T__s}{$T_{\mathrm{w}}$，$T_{\mathrm{r}}$ 和 $T_{\mathrm{s}}$ 表示}。详见附录 \ref{app:signing}。
 \end{description}
 
 此外，合约创建还包含以下字段:
@@ -328,34 +328,33 @@ T_{\mathbf{t}} \in \begin{cases} \mathbb{B}_{20} & \text{if} \quad T_{\mathrm{t}
 
 \subsection{The Block}\linkdest{block}\label{subsec:The_Block}
 
-在以太坊中，区块是相关信息的集合。与区块头 $H$ 想对应的交易信息为 $\mathbf{T}$，其它区块头数据的集合 $\mathbf{U}$ 表示它的父级区块中有和当前区块的爷爷辈区块是相同的。（这样的区块称为 \textit{ommers}\footnote{\textit{ommer} 的意思和自然界中的“父母的兄弟姐妹”最相近，参见 \url{https://nonbinary.miraheze.org/wiki/Gender_neutral_language\#Aunt.2FUncle}}）。区块头包含的的信息如下：
+在以太坊中，区块是由以下部分组成的：一些相关信息片段组成的集合（称为 block \textit{header}，即区块头）；组成区块的交易 $\mathbf{T}$ 和 \hypertarget{ommerheaders}{}其它一些区块头 $\mathbf{U}$ （这是一些父区块与当前区块的爷爷辈区块相同的区块，这样的区块称为 \textit{ommers}\footnote{\textit{ommer} 的意思和自然界中的“父母的兄弟姐妹”最相近，参见 \url{https://nonbinary.miraheze.org/wiki/Gender_neutral_language\#Aunt.2FUncle}}）。区块头包含的的信息如下：
 
 %\textit{TODO: Introduce logs}
 
 \begin{description}
-\item[parentHash，父块哈希] $H_p$,父区块头的 Keccak 256位哈希。
-\item[ommersHash，叔链哈希] $H_o$,当前区块的叔链列表 Keccak 256位哈希。
-\item[beneficiary，受益者地址] $H_c$，成功挖到这个区块的160位地址，这个区块中的所有交易费用都会转到这个地址。
-\item[stateRoot,状态字典树根节点哈希] 状态字典树根节点的 Keccak 256位哈希，交易打包到当前区块且区块定稿后可以生成这个值。
-\item[transactionsRoot,交易字典树根节点哈希] 交易字典树根节点的 Keccak 256位哈希,在交易字典树含有区块中的所有交易列表。
-\item[receiptsRoot,接受者字典树根节点哈希] 接受者字典树根节点的 Keccak 256位哈希,在接受者字典树含有区块中的所有交易信息中的接受者。
-\item[logsBloom,日志Bloom] $H_b$，日记Bloom过滤器由可索引信息（日志地址和日志主题）组成，这个信息包含在每个日志入口，来自交易列表中的每个交易的接受者。
-\item[difficulty,难度] $H_d$,表示当前区块的难度水平，这个值根据前一个区块的难度水平和时间戳计算得到。
-\item[number,区块编号] $H_i$,等于当前区块的直系前辈区块数量。 创始区块的区块编号为 0。
-\item[gasLimit,燃料限制] $H_l$,目前每个区块的燃料消耗上限。
-\item[gasUsed，燃料使用量] $H_g$,当前区块的所有交易使用燃料之和。
-\item[timestamp,时间戳] $H_s$,当前区块初始化时的Unix时间戳。
-\item[extraData,附加数据] $H_x$，32字节以内的字节数组。
-\item[mixHash,混合哈希] $H_m$,与一个与随机数(nonce)相关的256位哈希计算，用于证明针对当前区块已经完成了足够的计算。
-\item[nonce,随机数] $H_n$，一个 64 位哈希，和计算混合哈希相关，用于证明针对当前区块已经完成了足够的计算。
+\item[parentHash]\linkdest{parent_Hash_H__p_def_words}{} 父区块头的 Keccak 256 位哈希，由 $H_{\mathrm{p}}$ 表示。
+\item[ommersHash] 当前区块的 ommers 列表的 Keccak 256 位哈希，由 $H_{\mathrm{o}}$ 表示。
+\item[beneficiary]\linkdest{beneficiary_H__c}{}\linkdest{H__c} 成功挖到这个区块所得到的所有交易费的 160 位接收地址，由 $H_{\mathrm{c}}$ 表示。
+\item[stateRoot] 所有交易被执行完且区块定稿后的状态树（state trie）根节点的 Keccak 256 位哈希。
+\item[transactionsRoot] 由当前区块中所包含的所有交易所组成的树结构（transaction trie）根节点的 Keccak 256 位哈希，由 $H_{\mathrm{t}}$ 表示。
+\item[receiptsRoot]\linkdest{receipts_Root_def_words}{} 由当前区块中所有交易的收据所组成的树结构（receipt trie）根节点的 Keccak 256 位哈希。由 $H_{\mathrm{e}}$ 表示。
+\item[logsBloom]\linkdest{logs_Bloom_def_words}{} 由当前区块中所有交易的收据数据中的可索引信息（产生日志的地址和日志主题）组成的 Bloom 过滤器，由 $H_{\mathrm{b}}$ 表示。
+\item[difficulty] 当前区块难度水平的纯量值，它可以根据前一个区块的难度水平和时间戳计算得到，由 $H_{\mathrm{d}}$ 表示。
+\item[number]\linkdest{block_number_word_def_H_i}{} 当前区块的祖先的数量，由 $H_{\mathrm{i}}$ 表示。创世区块的这个数量为 0。
+\item[gasLimit] 目前每个区块的 gas 开支上限，由 $H_{\mathrm{l}}$ 表示。
+\item[gasUsed]\linkdest{block_gas_used_H__g}{}\linkdest{H__g} 当前区块的所有交易所用掉的 gas 之和，由 $H_{\mathrm{g}}$ 表示。
+\item[timestamp]\linkdest{block_timestamp_word_def_H__s}{} 当前区块初始化时的 Unix 时间戳，由 $H_{\mathrm{s}}$ 表示。
+\item[extraData]\linkdest{block_extraData_H__x}{} 与当前区块相关的任意字节数据，但必须在 32 字节以内，由 $H_{\mathrm{x}}$ 表示。
+\item[mixHash]\linkdest{mixHash_H__m}{}\linkdest{H__m} 一个 256 位的哈希值，用来与 nonce 一起证明当前区块已经承载了足够的计算量，由 $H_{\mathrm{m}}$ 表示。
+\item[nonce]\linkdest{block_nonce_H__n}{}\linkdest{block_nonce} 一个 64 位的值，用来与 mixHash 一起于证明当前区块已经承载了足够的计算量，由 $H_{\mathrm{n}}$ 表示。
 \end{description}
-
-此外,当前区块还记录着这个区块的交易列表,以及2个叔链(ommer)的区块头列表。我们以 \hyperlink{block}{$B$} 表示一个区块:
+\linkdest{ommer_block_headers_B__U}{}\linkdest{block_B}{}区块的另两个组成部分就是 ommer 区块头（与以上格式相同）列表 $B_{\mathbf{U}}$ 和一系列的交易 $B_{\mathbf{T}}$。我们可以表示一个区块 $B$：
 \begin{equation}
-B \equiv (B_H, B_\mathbf{T}, B_\mathbf{U})
+B \equiv (B_{H}, B_{\mathbf{T}}, B_{\mathbf{U}})
 \end{equation}
 
-\subsubsection{交易收据}
+\subsubsection{交易收据}\linkdest{Transaction_Receipt}{}
 
 为了让交易信息编码能有利于零知识证明、索引、搜索，我们将每个包含一定信息的交易收据进行编码。以 $B_\mathbf{R}[i]$ 表示第 $i$ 个交易,保存在一个索引字典树中,$H_e$ 是这个字典树的根节点。
 
@@ -500,27 +499,27 @@ D(H) \equiv \begin{dcases}
 \expdiffsymb \equiv \left\lfloor 2^{ \left\lfloor H_i \div 100000 \right\rfloor - 2 } \right\rfloor
 \end{equation}
 
-区块的燃料限制 $H_l$ 需要满足下面条件:
+区块的燃料限制 $H_{\mathrm{l}}$ 需要满足下面条件:
 \begin{eqnarray}
 & & H_l < {P(H)_H}_l + \left\lfloor\frac{{P(H)_H}_l}{1024}\right\rfloor \quad \wedge \\
 & & H_l > {P(H)_H}_l - \left\lfloor\frac{{P(H)_H}_l}{1024}\right\rfloor \quad \wedge \\
 & & H_l \geqslant 125000
 \end{eqnarray}
 
-$H_s$ 是区块 $H$ 的时间戳,需满足下面条件:
+$H_{\mathrm{s}}$ 是区块 $H$ 的时间戳,需满足下面条件:
 \begin{equation}
 H_s > {P(H)_H}_s
 \end{equation}
 
 这个机制保证了区块间时间平衡；如果最近的两个区块时间间隔短,则会导致难度系数增加,因此需要额外的计算量，大概率会延长下个区块的出块时间。相反，如果最近的2个区块时间间隔时间过长，难度系数和下一个区块的出块预期时间也会减少。
 
-随机数 $H_n$ 需满足下面关系：
+随机数 $H_{\mathrm{n}}$ 需满足下面关系：
 \begin{equation}
 n \leqslant \frac{2^{256}}{H_d} \quad \wedge \quad m = H_m
 \end{equation}
 with $(n, m) = \mathtt{PoW}(H_{\hcancel{n}}, H_n, \mathbf{d})$.
 
-其中 $H_{\hcancel{n}}$ 是新区块的区块头，但不包含随机数和混合哈希值，$\mathbf{d}$  是当前的数据集合 DAG(有向无环图)，需要去计算混合哈希， $\mathtt{PoW}$ 是工作量证明函数（见 \ref{ch:pow}）：第一个元素用于计算混合哈希值，以证明使用了一个正确的 DAG，第 2 个元素是伪随机数,依赖于 $H$ 及 $\mathbf{d}$ 。给定一个范围在$[0, 2^{64})$ 的均匀分布，则求解时间和难度 $H_d$ 成比例。
+其中 $H_{\hcancel{n}}$ 是新区块的区块头，但不包含随机数和混合哈希值，$\mathbf{d}$  是当前的数据集合 DAG(有向无环图)，需要去计算混合哈希， $\mathtt{PoW}$ 是工作量证明函数（见 \ref{ch:pow}）：第一个元素用于计算混合哈希值，以证明使用了一个正确的 DAG，第 2 个元素是伪随机数,依赖于 $H$ 及 $\mathbf{d}$ 。给定一个范围在$[0, 2^{64})$ 的均匀分布，则求解时间和难度 $H_{\mathrm{d}}$ 成比例。
 
 这就是区块链安全基础，这也是一个恶意节点不能用其新创建的区块中重写历史数据的重要原因。因为这个随机数必须满足这些条件，且因为条件依赖于这个区块的内容和相关交易，创建新的合法的区块是困难且耗时的，需要超过所有诚实矿工的算力总和。
 
@@ -1155,7 +1154,7 @@ B^* & \equiv & B \quad \text{except:} \quad B^*_r = r(\Pi(\Gamma(B), B))
 m = H_m \quad \wedge \quad n \leqslant \frac{2^{256}}{H_d} \quad \text{with} \quad (m, n) = \mathtt{PoW}(H_{\hcancel{n}}, H_n, \mathbf{d})
 \end{equation}
 
-其中 $H_{\hcancel{n}}$ 是没有包含随机数和混合哈希元素的新区块头; $H_n$ 是区块头的随机数；$\mathbf{d}$ 是一个需要计算混合哈希值的数据集合;$H_d$ 是新区块的难度值（区块难度详见小结 \ref{ch:ghost} ）。$\mathtt{PoW}$ 是工作量证明函数，这个函数根据数组做计算, 这个数组中的第一个元素是混合哈希,第二个元素是依赖于 $H$ 和 $\mathbf{d}$ 的加密伪随机数。这个算法称为 Ethash , 下文会详细介绍。
+其中 $H_{\hcancel{n}}$ 是没有包含随机数和混合哈希元素的新区块头; $H_{\mathrm{n}}$ 是区块头的随机数；$\mathbf{d}$ 是一个需要计算混合哈希值的数据集合;$H_{\mathrm{d}}$ 是新区块的难度值（区块难度详见小结 \ref{ch:ghost} ）。$\mathtt{PoW}$ 是工作量证明函数，这个函数根据数组做计算, 这个数组中的第一个元素是混合哈希,第二个元素是依赖于 $H$ 和 $\mathbf{d}$ 的加密伪随机数。这个算法称为 Ethash , 下文会详细介绍。
 
 \subsubsection{Ethash}
 
