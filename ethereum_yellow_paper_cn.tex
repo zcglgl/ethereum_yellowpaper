@@ -370,12 +370,12 @@ L_{R}(R) \equiv (0 \in \mathbb{B}_{256}, R_{\mathrm{u}}, R_{\mathrm{b}}, R_{\mat
 \end{equation}
 其中，$0 \in \mathbb{B}_{256}$ 代替了先前协议版本中的交易前状态根（the pre-transaction state root）。
 
-\linkdest{R__z_assert}我们推定状态代码 $R_{\mathrm{z}}$ 是一个整数。
+\linkdest{R__z_assert}我们要求状态代码 $R_{\mathrm{z}}$ 是一个整数。
 \begin{equation}
 R_{\mathrm{z}} \in \mathbb{N}
 \end{equation}
 
-\linkdest{R__u_assert}我们推定累积的 gas 使用量 $R_{\mathrm{u}}$ 是一个正整数，且日志的 Bloom $R_{\mathrm{b}}$ 是一个 2048 位（256字节）数据的哈希：
+\linkdest{R__u_assert}我们要求累积的 gas 使用量 $R_{\mathrm{u}}$ 是一个正整数，且日志的 Bloom $R_{\mathrm{b}}$ 是一个 2048 位（256字节）数据的哈希：
 \begin{equation}
 R_{\mathrm{u}} \in \mathbb{N} \quad \wedge \quad R_{\mathrm{b}} \in \mathbb{B}_{256}
 \end{equation}
@@ -407,74 +407,71 @@ m(\mathbf{x}, i) &\equiv& \mathtt{\tiny KEC}(\mathbf{x})[i, i + 1] \bmod 2048
 
 \subsubsection{整体有效性}
 
-如果一个区块同时满足以下几个条件，我们才能认为这个区块是有效的：当从起始状态 $\boldsymbol{\sigma}$ (父块的最终状态) 按顺序执行完生成新的状态 $H_r$ 后，在内部要保持一致,包括叔链、交易区块哈希、给定的交易 $B_\mathbf{T}$（详细描述见 \ref{ch:finalisation}）:
-
+\linkdest{block_validity}{}当且仅当一个区块同时满足以下几个条件，我们才认为它是有效的：它必须由内部一致的 ommer 和交易区块哈希值所组成，且基于起始状态 $\boldsymbol{\sigma}$（由父区块的最终状态继承而来）按顺序执行完成所有的给定交易 $B_{\mathbf{T}}$（就像在 \ref{ch:finalisation} 节所介绍的那样）后所达到的标识符 $H_{\mathrm{r}}$ 的一个新的状态：
 \begin{equation}
 \begin{array}[t]{lclc}
-H_r &\equiv& \mathtt{\small TRIE}(L_{S}(\Pi(\boldsymbol{\sigma}, B))) & \wedge \\
-H_o &\equiv& \mathtt{\small KEC}(\mathtt{\small RLP}(L_H^*(B_\mathbf{U}))) & \wedge \\
-H_t &\equiv& \mathtt{\small TRIE}(\{\forall i < \lVert B_\mathbf{T} \rVert, i \in \mathbb{P}: p(i, L_T(B_\mathbf{T}[i]))\}) & \wedge \\
-H_e &\equiv& \mathtt{\small TRIE}(\{\forall i < \lVert B_\mathbf{R} \rVert, i \in \mathbb{P}: p(i, L_R(B_\mathbf{R}[i]))\}) & \wedge \\
-H_b &\equiv& \bigvee_{\mathbf{r} \in B_\mathbf{R}} \big( \mathbf{r}_b \big)
+\linkdest{new_state_H__r}{}H_{\mathrm{r}} &\equiv& \mathtt{\small TRIE}(L_S(\Pi(\boldsymbol{\sigma}, B))) & \wedge \\
+\linkdest{Ommer_block_hash_H__o}{}H_{\mathrm{o}} &\equiv& \mathtt{\small KEC}(\mathtt{\small RLP}(L_H^*(B_{\mathbf{U}}))) & \wedge \\
+\linkdest{tx_block_hash_H__t}{}H_{\mathrm{t}} &\equiv& \mathtt{\small TRIE}(\{\forall i < \lVert B_{\mathbf{T}} \rVert, i \in \mathbb{P}: &\\&& \quad\quad p (i, L_{T}(B_{\mathbf{T}}[i]))\}) & \wedge \\
+\linkdest{Receipts_Root_H__e}{}H_{\mathrm{e}} &\equiv& \mathtt{\small TRIE}(\{\forall i < \lVert B_{\mathbf{R}} \rVert, i \in \mathbb{P}: &\\&& \quad\quad p(i, \hyperlink{transaction_receipt_preparation_function_for_RLP_serialisation}{L_{R}}(B_{\mathbf{R}}[i]))\}) & \wedge \\
+\linkdest{logs_Bloom_filter_H__b}{}H_{\mathrm{b}} &\equiv& \bigvee_{\mathbf{r} \in B_{\mathbf{R}}} \big( \mathbf{r}_{\mathrm{b}} \big)
 \end{array}
 \end{equation}
-
-其中 $p(k, v)$ 是 RLP 的简单对转换，在这个例子中，k 为这个区块中的交易索引,v 为交易收据:
+其中 $p(k, v)$ 就是简单的 RLP 变换对，在这里，k 是交易在区块中的索引，v 是交易收据：
 \begin{equation}
 p(k, v) \equiv \big( \mathtt{\small RLP}(k), \mathtt{\small RLP}(v) \big)
 \end{equation}
 
-此外:
+此外：
 \begin{equation}
-\mathtt{\small TRIE}(L_{S}(\boldsymbol{\sigma})) = {P(B_H)_H}_r
+\mathtt{\small TRIE}(L_{S}(\boldsymbol{\sigma})) = {P(B_H)_H}_{\mathrm{r}}
 \end{equation}
 
-$\texttt{\small TRIE}(L_{S}(\boldsymbol{\sigma}))$ 是包含以RLP编码的状态 $\boldsymbol{\sigma}$ 键值对的 Merkle Patricia 树根节点哈希，$P(B_H)$ 是父节点。
+这样，$\texttt{\small TRIE}(L_{S}(\boldsymbol{\sigma}))$ 是以状态 $\boldsymbol{\sigma}$ 和以 RLP 编码的值作为键值对数据的 Merkle Patricia 树根节点哈希，$P(B_{H})$ 就是父区块 $B$。
 
-这些值根据交易计算产生，特别是交易收据 $B_\mathbf{R}$,这个通过交易状态累积函数 $\hyperlink{Pi}{\Pi}$ 定义，在 \ref{sec:statenoncevalidation} 会详细说明。
+这些源于交易计算所产生的值，具体来讲就是\hyperlink{Transaction_Receipt}{交易收据} $B_\mathbf{R}$，以及通过交易的\hyperlink{Pi}{状态累积函数所定义的 $\Pi$}，会在 \ref{sec:statenoncevalidation} 节详细说明。
 
 \subsubsection{序列化}
 
-函数 $L_B$ 和 $L_H$ 分别是区块和区块头的预备函数。类似交易收据预备函数 $L_R$，当转换为 RLP 格式时,假设对应的类型、顺序及结构如下:
-
+\hypertarget{block_preparation_function_for_RLP_serialization_L__B}{}\linkdest{L__B}\hypertarget{block_preparation_function_for_RLP_serialization_L__H}{}\linkdest{L__B}函数 $L_{B}$ 和 $L_{H}$ 分别是区块和区块头的预备函数。与\hyperlink{transaction_receipt_preparation_function_for_RLP_serialisation}{交易收据预备函数 $L_{R}$}非常相似，当需要进行 RLP 变换时，我们要求结构的类型和顺序如下：
 \begin{eqnarray}
-\quad L_H(H) & \equiv & (\begin{array}[t]{l}H_p, H_o, H_c, H_r, H_t, H_e, H_b, H_d,\\ H_i, H_l, H_g, H_s, H_x, H_m, H_n \; )\end{array} \\
-\quad L_B(B) & \equiv & \big( L_H(B_H), L_T^*(B_\mathbf{T}), L_H^*(B_\mathbf{U}) \big)
+\quad L_{H}(H) & \equiv & (\begin{array}[t]{l}H_{\mathrm{p}}, H_{\mathrm{o}}, H_{\mathrm{c}}, H_{\mathrm{r}}, H_{\mathrm{t}}, H_{\mathrm{e}}, H_{\mathrm{b}}, H_{\mathrm{d}},\\ H_{\mathrm{i}}, H_{\mathrm{l}}, H_{\mathrm{g}}, H_{\mathrm{s}}, H_{\mathrm{x}}, H_{\mathrm{m}}, H_{\mathrm{n}} \; )\end{array} \\
+\quad L_{B}(B) & \equiv & \big( L_{H}(B_{H}), L_{T}^*(B_{\mathbf{T}}), L_{H}^*(\hyperlink{ommer_block_headers_B__U}{B_{\mathbf{U}}}) \big)
 \end{eqnarray}
 
-其中 $L_T^*$ 和 $L_H^*$ 是元素序列转换函数,因此:
+\hypertarget{general_element_wise_sequence_transformation_f_pow_asterisk}{}其中 $L_T^*$ 和 $L_H^*$ 是适用于所有元素的序列转换，因此：
 \begin{equation}
-f^*\big( (x_0, x_1, ...) \big) \equiv \big( f(x_0), f(x_1), ... \big) \quad \text{对于任何函数} \; f
+\hyperlink{general_element_wise_sequence_transformation_f_pow_asterisk}{f^*}\big( (x_0, x_1, ...) \big) \equiv \big( f(x_0), f(x_1), ... \big) \quad \text{对所有函数} \; f
 \end{equation}
 
-元素类型定义如下:
+其组成要素的类型定义如下：
 \begin{equation}
 \begin{array}[t]{lclclcl}
-H_p \in \mathbb{B}_{32} & \wedge & H_o \in \mathbb{B}_{32} & \wedge & H_c \in \mathbb{B}_{20} & \wedge \\
-H_r \in \mathbb{B}_{32} & \wedge & H_t \in \mathbb{B}_{32} & \wedge & H_e \in \mathbb{B}_{32} & \wedge \\
-H_b \in \mathbb{B}_{256} & \wedge & H_d \in \mathbb{P} & \wedge & H_i \in \mathbb{P} & \wedge \\
-H_l \in \mathbb{P} & \wedge & H_g \in \mathbb{P} & \wedge & H_s \in \mathbb{P}_{256} & \wedge \\
-H_x \in \mathbb{B} & \wedge & H_m \in \mathbb{B}_{32} & \wedge & H_n \in \mathbb{B}_{8}
+\hyperlink{parent_Hash_H__p_def_words}{H_{\mathrm{p}}} \in \mathbb{B}_{32} & \wedge & H_{\mathrm{o}} \in \mathbb{B}_{32} & \wedge & H_{\mathrm{c}} \in \mathbb{B}_{20} & \wedge \\
+\hyperlink{new_state_H__r}{H_{\mathrm{r}}} \in \mathbb{B}_{32} & \wedge & H_{\mathrm{t}} \in \mathbb{B}_{32} & \wedge & \hyperlink{Receipts_Root_H__e}{H_{\mathrm{e}}} \in \mathbb{B}_{32} & \wedge \\
+\hyperlink{logs_Bloom_filter_H__b}{H_{\mathrm{b}}} \in \mathbb{B}_{256} & \wedge & H_{\mathrm{d}} \in \mathbb{N} & \wedge & \hyperlink{block_number_H__i}{H_{\mathrm{i}}} \in \mathbb{N} & \wedge \\
+\hyperlink{block_gas_limit_H__l}{H_{\mathrm{l}}} \in \mathbb{N} & \wedge & H_{\mathrm{g}} \in \mathbb{N} & \wedge & \hyperlink{block_timestamp_H__s}{H_{\mathrm{s}}} \in \mathbb{N}_{256} & \wedge \\
+\hyperlink{block_extraData_H__x}{H_{\mathrm{x}}} \in \mathbb{B} & \wedge & H_{\mathrm{m}} \in \mathbb{B}_{32} & \wedge & \hyperlink{block_nonce_H__n}{H_{\mathrm{n}}} \in \mathbb{B}_{8}
 \end{array}
 \end{equation}
 
 其中
 \begin{equation}
-\mathbb{B}_n = \{ B: B \in \mathbb{B} \wedge \lVert B \rVert = n \}
+\mathbb{B}_{\mathrm{n}} = \{ B: B \in \mathbb{B} \wedge \lVert B \rVert = n \}
 \end{equation}
 
-我们现在有了一个严密正式的区块结构结构说明。RLP 函数（见附录 \ref{app:rlp}）提供了一个标准方法来把这个结构转换为一个字节序列。
+我们现在有了一个严格的区块结构构造说明。RLP 函数 $\texttt{\small RLP}$（见附录 \ref{app:rlp}）提供了权威的方法来把这个结构转换为一个可以通过网络传输或在本地存储的字节序列。
 
 \subsubsection{区块头验证}
 
-我们定义 $P(B_H)$ 为 \hyperlink{block}{$B$} 的父区块:
+我们把 $P(B_{H})$ 定义为 $B$ 的父区块：
 \begin{equation}
-P(H) \equiv B': \mathtt{\tiny KEC}(\mathtt{\tiny RLP}(B'_H)) = H_p
+P(H) \equiv B': \mathtt{\tiny KEC}(\mathtt{\tiny RLP}(B'_{H})) = \hyperlink{parent_Hash_H__p_def_words}{H_{\mathrm{p}}}
 \end{equation}
 
-当前区块编号等于它的父块编号加1：
+\hypertarget{block_number_H__i}{}其区块号等于它的父区块号加 1：
 \begin{equation}
-H_i \equiv {{P(H)_H}_i} + 1
+H_{\mathrm{i}} \equiv {{P(H)_{H}}_{\mathrm{i}}} + 1
 \end{equation}
 
 \newcommand{\mindifficulty}{D_0}
@@ -482,65 +479,73 @@ H_i \equiv {{P(H)_H}_i} + 1
 \newcommand{\expdiffsymb}{\ensuremath{\epsilon}}
 \newcommand{\diffadjustment}{x}
 
-区块难度定义为 $D(H)$：
+\hypertarget{block_difficulty_H__d}{}\linkdest{H__d}我们将一个区块头 $H$ 的权威难度值定义为 $D(H)$：
 \begin{equation}
 D(H) \equiv \begin{dcases}
-\mindifficulty & \text{if} \quad H_i = 0\\
-\text{max}\!\left(\mindifficulty, {P(H)_H}_d + \diffadjustment\times\homesteadmod + \expdiffsymb \right) & \text{otherwise}\\
+\mindifficulty & \text{if} \quad H_{\mathrm{i}} = 0\\
+\text{max}\!\left(\mindifficulty, {P(H)_{H}}_{\mathrm{d}} + \diffadjustment\times\homesteadmod + \expdiffsymb \right) & \text{otherwise}\\
 \end{dcases}
 \end{equation}
-其中:
+其中：
 \begin{equation}
 \mindifficulty \equiv 131072
 \end{equation}
 \begin{equation}
-\diffadjustment \equiv \left\lfloor\frac{{P(H)_H}_d}{2048}\right\rfloor
+\diffadjustment \equiv \left\lfloor\frac{{P(H)_{H}}_{\mathrm{d}}}{2048}\right\rfloor
 \end{equation}
 \begin{equation}
-\homesteadmod \equiv \text{max}\left( 1 - \left\lfloor\frac{H_s - {P(H)_H}_s}{10}\right\rfloor, -99 \right)
+\homesteadmod \equiv \text{max}\left( y - \left\lfloor\frac{H_{\mathrm{s}} - {P(H)_{H}}_{\mathrm{s}}}{9}\right\rfloor, -99 \right)
 \end{equation}
-\begin{equation}
-\expdiffsymb \equiv \left\lfloor 2^{ \left\lfloor H_i \div 100000 \right\rfloor - 2 } \right\rfloor
-\end{equation}
+\begin{equation*}
+y \equiv \begin{cases}
+1 & \text{if} \, \lVert P(H)_{\mathbf{U}}\rVert = 0 \\
+2 & \text{otherwise}
+\end{cases}
+\end{equation*}
+\begin{align}
+\expdiffsymb &\equiv \left\lfloor 2^{ \left\lfloor H'_{\mathrm{i}} \div 100000 \right\rfloor - 2 } \right\rfloor \\
+H'_{\mathrm{i}} &\equiv \max(H_{\mathrm{i}} - 3000000, 0)
+\end{align}
 
-区块的燃料限制 $H_{\mathrm{l}}$ 需要满足下面条件:
+Note that $\mindifficulty$ is the difficulty of the genesis block. The \textit{Homestead} difficulty parameter, $\homesteadmod$, is used to affect a dynamic homeostasis of time between blocks, as the time between blocks varies, as discussed below, as implemented in EIP-2 by \cite{EIP-2}. In the Homestead release, the exponential difficulty symbol, $\expdiffsymb$ causes the difficulty to slowly increase (every 100,000 blocks) at an exponential rate, and thus increasing the block time difference, and putting time pressure on transitioning to proof-of-stake. This effect, known as the "difficulty bomb", or "ice age", was explained in EIP-649 by \cite{EIP-649} and delayed and implemented earlier in EIP-2. $\homesteadmod$ was also modified in EIP-100 with the use of $x$, the adjustment factor above, and the denominator 9, in order to target the mean block time including uncle blocks by \cite{EIP-100}. Finally, in the Byzantium release, with EIP-649, the ice age was delayed by creating a fake block number, $H'_{\mathrm{i}}$, which is obtained by subtracting three million from the actual block number, which in other words reduced $\expdiffsymb$ and the time difference between blocks, in order to allow more time to develop proof-of-stake and preventing the network from "freezing" up.
+
+\hypertarget{block_gas_limit_H__l}{}区块头 $H$ 的 gas 限制 $H_{\mathrm{l}}$ 需要满足下列条件：
 \begin{eqnarray}
-& & H_l < {P(H)_H}_l + \left\lfloor\frac{{P(H)_H}_l}{1024}\right\rfloor \quad \wedge \\
-& & H_l > {P(H)_H}_l - \left\lfloor\frac{{P(H)_H}_l}{1024}\right\rfloor \quad \wedge \\
-& & H_l \geqslant 125000
+& & H_{\mathrm{l}} < {P(H)_{H}}_{\mathrm{l}} + \left\lfloor\frac{{P(H)_{H}}_{\mathrm{l}}}{1024}\right\rfloor \quad \wedge \\
+\nonumber& & H_{\mathrm{l}} > {P(H)_{H}}_{\mathrm{l}} - \left\lfloor\frac{{P(H)_{H}}_{\mathrm{l}}}{1024}\right\rfloor \quad \wedge \\
+\nonumber& & H_{\mathrm{l}} \geqslant 5000
 \end{eqnarray}
 
-$H_{\mathrm{s}}$ 是区块 $H$ 的时间戳,需满足下面条件:
+\hypertarget{block_timestamp_H__s}{}$H_{\mathrm{s}}$ 是区块 $H$ 的时间戳（以 Unix 的 time() 函数的形式），需要满足下列条件:
 \begin{equation}
-H_s > {P(H)_H}_s
+H_{\mathrm{s}} > {P(H)_{H}}_{\mathrm{s}}
 \end{equation}
 
-这个机制保证了区块间时间平衡；如果最近的两个区块时间间隔短,则会导致难度系数增加,因此需要额外的计算量，大概率会延长下个区块的出块时间。相反，如果最近的2个区块时间间隔时间过长，难度系数和下一个区块的出块预期时间也会减少。
+这个机制保证了区块时间的动态平衡；如果最近的两个区块间隔较短，则会导致难度值增加，因此需要额外的计算量，大概率会延长下个区块的出块时间。相反，如果最近的两个区块间隔过长，难度值和下一个区块的预期出块时间也会减少。
 
-随机数 $H_{\mathrm{n}}$ 需满足下面关系：
+这里的 nonce \linkdest{H__n}\hyperlink{block_nonce_H__n}{$H_{\mathrm{n}}$} 需满足下列关系：
 \begin{equation}
-n \leqslant \frac{2^{256}}{H_d} \quad \wedge \quad m = H_m
+n \leqslant \frac{2^{256}}{H_{\mathrm{d}}} \quad \wedge \quad m = H_{\mathrm{m}}
 \end{equation}
-with $(n, m) = \mathtt{PoW}(H_{\hcancel{n}}, H_n, \mathbf{d})$.
+with $(n, m) = \mathtt{PoW}(H_{\hcancel{n}}, H_{\mathrm{n}}, \mathbf{d})$.
 
-其中 $H_{\hcancel{n}}$ 是新区块的区块头，但不包含随机数和混合哈希值，$\mathbf{d}$  是当前的数据集合 DAG(有向无环图)，需要去计算混合哈希， $\mathtt{PoW}$ 是工作量证明函数（见 \ref{ch:pow}）：第一个元素用于计算混合哈希值，以证明使用了一个正确的 DAG，第 2 个元素是伪随机数,依赖于 $H$ 及 $\mathbf{d}$ 。给定一个范围在$[0, 2^{64})$ 的均匀分布，则求解时间和难度 $H_{\mathrm{d}}$ 成比例。
+\hypertarget{block_header_without_nonce_and_mixmash_h__cancel_n}{}\linkdest{H_cancel_n}其中 $H_{\hcancel{n}}$ 是新区块的区块头，但不包含随机数和混合哈希值，$\mathbf{d}$  是当前的数据集合 DAG(有向无环图)，需要去计算混合哈希， $\mathtt{PoW}$ 是工作量证明函数（见 \ref{ch:pow}）：第一个元素用于计算混合哈希值，以证明使用了一个正确的 DAG，第 2 个元素是伪随机数,依赖于 $H$ 及 $\mathbf{d}$ 。给定一个范围在$[0, 2^{64})$ 的均匀分布，则求解时间和难度 $H_{\mathrm{d}}$ 成比例。
 
 这就是区块链安全基础，这也是一个恶意节点不能用其新创建的区块中重写历史数据的重要原因。因为这个随机数必须满足这些条件，且因为条件依赖于这个区块的内容和相关交易，创建新的合法的区块是困难且耗时的，需要超过所有诚实矿工的算力总和。
 
-因此,我们定义这个区块头的验证函数 $V(H)$ 为：
-
+\hypertarget{block_header_validity_function}{}因此,我们定义这个区块头的验证函数 $V(H)$ 为：
 \begin{eqnarray}
-V(H) & \equiv &  n \leqslant \frac{2^{256}}{H_d} \wedge m = H_m \quad \wedge \\
-& & H_d = D(H) \quad \wedge \\
-& & H_g \le H_l  \quad \wedge \\
-& & H_l < {P(H)_H}_l + \left\lfloor\frac{{P(H)_H}_l}{1024}\right\rfloor  \quad \wedge \\
-& & H_l > {P(H)_H}_l - \left\lfloor\frac{{P(H)_H}_l}{1024}\right\rfloor  \quad \wedge \\
-& & H_l \geqslant 125000  \quad \wedge \\
-& & H_s > {P(H)_H}_s \quad \wedge \\
-& & H_i = {P(H)_H}_i +1 \quad \wedge \\
-& & \lVert H_x \rVert \le 32
+V(H) & \equiv &  n \leqslant \frac{2^{256}}{H_{\mathrm{d}}} \wedge m = H_{\mathrm{m}} \quad \wedge \\
+\nonumber & & H_{\mathrm{d}} = D(H) \quad \wedge \\
+\nonumber& & H_{\mathrm{g}} \le H_{\mathrm{l}}  \quad \wedge \\
+\nonumber& & H_{\mathrm{l}} < {P(H)_{H}}_{\mathrm{l}} + \left\lfloor\frac{{P(H)_{H}}_{\mathrm{l}}}{1024}\right\rfloor  \quad \wedge \\
+\nonumber& & H_{\mathrm{l}} > {P(H)_{H}}_{\mathrm{l}} - \left\lfloor\frac{{P(H)_{H}}_{\mathrm{l}}}{1024}\right\rfloor  \quad \wedge \\
+\nonumber& & H_{\mathrm{l}} \geqslant 5000  \quad \wedge \\
+\nonumber& & H_{\mathrm{s}} > {P(H)_{H}}_{\mathrm{s}} \quad \wedge \\
+\nonumber& & H_{\mathrm{i}} = {P(H)_{H}}_{\mathrm{i}} +1 \quad \wedge \\
+\nonumber& & \lVert H_{\mathrm{x}} \rVert \le 32
 \end{eqnarray}
-其中 $(n, m) = \mathtt{PoW}(H_{\hcancel{n}}, H_n, \mathbf{d})$
+其中 $(n, m) = \mathtt{PoW}(H_{\hcancel{n}}, H_{\mathrm{n}}, \mathbf{d})$
 
 此外，\textbf{extraData} 最多 32 字节。
 
@@ -555,6 +560,7 @@ V(H) & \equiv &  n \leqslant \frac{2^{256}}{H_d} \wedge m = H_m \quad \wedge \\
 \section{交易执行} \label{ch:transactions}
 
 交易执行是以太坊协议中最复杂的部分：它定义了状态转换函数 \hyperlink{Upsilon_state_transition}{$\Upsilon$}。所有交易在执行时,都要先通过内部的有效性测试,这些包含：
+
 \begin{enumerate}
 \item 交易是 RLP 格式数据，没有多余的后缀字节；
 \item 交易的签名是有效的；
@@ -571,10 +577,9 @@ $T$ 表示交易，$\boldsymbol{\sigma}$ 表示状态，状态转移函数 \hype
 $\boldsymbol{\sigma}'$ 是交易后的状态。我们定义 $\Upsilon^g$ 为交易执行所消耗的燃料量，$\Upsilon^\mathbf{l}$ 为交易过程中产生的日志记录，这些都会在后文正式定义。
 
 \subsection{子状态}
-
 从交易执行过程来看，伴随交易会产生一些特定的信息，我们称为交易子状态，用 $A$ 来表示:
 \begin{equation}
-A \equiv (A_\mathbf{s}, A_\mathbf{l}, A_r)
+A \equiv (A_{\mathbf{s}}, A_{\mathbf{l}}, A_{\mathbf{t}}, A_{\mathrm{r}})
 \end{equation}
 
 元组内容包含自毁集合 $A_\mathbf{s}$: 一个在交易完成后被删除的账户集合。 $A_\mathbf{l}$ 是一系列的日志：在代码执行过程中是可归档，可索引的检查点，允许以太坊世界的外部旁观者(例如去中心化应用的前端)跟踪合约调用。$A_r$ 表示返回的余额，当使用 {\small SSTORE} 指令将非0的合约存贮空间置为0时,返回余额会增加。虽然不是立即返回余额，但可以部分抵消整个执行费用。
