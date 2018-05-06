@@ -1,6 +1,7 @@
 \documentclass[9pt,oneside]{amsart}
 \usepackage{xeCJK}
 \setCJKmainfont{SimSun}
+\setCJKmonofont{SimSun}
 \usepackage{url}
 \usepackage{cancel}
 \usepackage{xspace}
@@ -70,7 +71,7 @@
 \author{
     原文作者：Dr. Gavin Wood, gavin@ethcore.io\\
     正文翻译：崔广斌（微信号：yuange1024）；高天露（tianlu.jorden.gao@gmail.com） \\
-    拜占庭版本校订/更新：杨镇（rivers.yang@icloud.com）
+    拜占庭版本校订、更新：杨镇（rivers.yang@icloud.com）
 }
 \begin{document}
 
@@ -551,135 +552,137 @@ V(H) & \equiv &  n \leqslant \frac{2^{256}}{H_{\mathrm{d}}} \wedge m = H_{\mathr
 
 \section{Gas 及其支付} \label{ch:payment}
 
-为了避免网络滥用及回避由于图灵完整性而带来的一些不可避免的问题，在以太坊中所有的程序执行都需要费用。各种操作费用以 \textit{gas} (详见附录 \ref{app:fees} )为单位计算。任意的程序片段（包括合约创建、信息调回、利用及访问账户存储、在虚拟机上执行操作等）都可以根据规则计算出消耗的燃料数量。
+为了避免网络滥用及回避由于图灵完整性而带来的一些不可避免的问题，在以太坊中所有的程序执行都需要费用。各种操作费用以 \textit{gas}（详见附录 \ref{app:fees} 中与不同计算相关的费用说明）为单位计算。任意的程序片段（包括合约创建、消息调用、分配资源以及访问账户存储、在虚拟机上执行操作等）都会有一个普遍认同的 gas 消耗。
 
-每一个交易都有燃料上限：\textbf{gasLimit} (燃料上限)。这些燃料从发送者的账户中扣除。具体从账户上扣除的额度和 \textbf{gasPrice}(燃料价格) 有关(译者注: 扣除额度 = \textbf{gasLimit} * \textbf{gasPrice})，在执行交易前会指定燃料价格。如果这个账户不能支付起燃料费用，交易会被当作无效交易。之所以命名为燃料上限，是因为剩余的燃料在交易完成之后会被退回（以购买时的同样价格）到发送者账户。燃料不会被用在交易执行之外。因此对于可信任账户，应该设置一个相对较高的燃料上限。
+每一个交易都要指定一个 gas 上限：\textbf{gasLimit}。这些 gas 会从发送者的账户余额中扣除。这种购买是通过同样在交易中指定的 \textbf{gasPrice} 来完成的。如果这个账户的余额不能支持这样的购买，交易会被视为无效交易。之所以将其命名为 \textbf{gasLimit}，是因为剩余的 gas 会在交易完成后被返还（与购买时同样价格）到发送者账户。Gas 不会在交易执行之外存在，因此对于可信任的账户，应该设置一个相对较高的 gas 上限。
 
-通常来说，以太币（Ether）用作购买燃料，未退回的部分转到了区块受益人的地址，通常这个账户的地址是由矿工设定。交易者可以任意设定燃料价格，然而矿工也可以任意地忽略某个交易。在一个交易中，高价格的燃料将消费这个发送者更多的以太币,并转给矿工更多的以太币，因此这个交易会被更多的矿工选择。通常来说，矿工会选择去通知这是他们执行交易最低燃料价格，交易者们一般也会些选择一个高过燃料价格下限的价格。因此，会有一个（加权的）最低燃料可接受价格分布，交易者们需要权衡降低燃料价格和交易快速被矿工打包。
+通常来说，以太币（Ether）是用来购买 gas 的，未返还的部分就会移交到 \textit{beneficiary} 的地址（即一般由矿工所控制的一个账户地址）。交易者可以随意指定 \textbf{gasPrice}，然而矿工也可以任意地忽略某个交易。一个高 gas 价格的交易将花费发送者更多的以太币，也就将移交给矿工更多的以太币，因此这个交易自然会被更多的矿工选择打包进区块。通常来说，矿工会选择公告他们执行交易的最低 gas 价格，交易者们也就可以据此来提供一个具体的价格。因此，会有一个（加权的）最低的可接受 gas 价格分布，交易者们则需要在降低 gas 价格和使交易能最快地被矿工打包间进行权衡。
+
+%\subsubsection{Determining Computation Costs}
 
 \section{交易执行} \label{ch:transactions}
 
-交易执行是以太坊协议中最复杂的部分：它定义了状态转换函数 \hyperlink{Upsilon_state_transition}{$\Upsilon$}。所有交易在执行时,都要先通过内部的有效性测试,这些包含：
+交易执行是以太坊协议中最复杂的部分：它定义了状态转换函数 \hyperlink{Upsilon_state_transition}{$\Upsilon$}。我们假定任意交易在执行时前都要先通过初始的基础有效性测试。包含：
 
 \begin{enumerate}
 \item 交易是 RLP 格式数据，没有多余的后缀字节；
 \item 交易的签名是有效的；
-\item 交易的随机数是有效的（等于发送者账户的当前随机数）;
-\item 燃料上限不小于实际交易过程中用的燃料 $g_0$;
-\item 发送者账户的余额至少大于费用 $v_0$,需要提前支付。
+\item \hyperlink{transaction_nonce}{交易的 nonce} 是有效的（等于\hyperlink{account_nonce}{发送者账户当前的 nonce}）；
+\item gas 上限不小于交易所要使用的 gas $g_0$;
+\item 发送者账户的余额应该不少于实际费用 $v_0$，且需要提前支付。
 \end{enumerate}
 
-$T$ 表示交易，$\boldsymbol{\sigma}$ 表示状态，状态转移函数 \hyperlink{Upsilon_state_transition}{$\Upsilon$} 如下:
+这样，我们可以定义状态转移函数 \hyperlink{Upsilon_state_transition}{$\Upsilon$}，其中 $T$ 表示交易，$\boldsymbol{\sigma}$ 表示状态：
 \begin{equation}
 \boldsymbol{\sigma}' = \Upsilon(\boldsymbol{\sigma}, T)
 \end{equation}
 
-$\boldsymbol{\sigma}'$ 是交易后的状态。我们定义 $\Upsilon^g$ 为交易执行所消耗的燃料量，$\Upsilon^\mathbf{l}$ 为交易过程中产生的日志记录，这些都会在后文正式定义。
+因此 $\boldsymbol{\sigma}'$ 是交易后的状态。我们也定义 \hyperlink{tx_total_gas_used_Upsilon_pow_g}{$\Upsilon^{\mathrm{g}}$} 为交易执行所消耗的 gas 数量；\hyperlink{tx_logs_Upsilon_pow_l}{$\Upsilon^{\mathbf{l}}$} 为交易过程中累积产生的日志项；以及 \hyperlink{tx_status_Upsilon_pow_z}{$\Upsilon^{\mathrm{z}}$} 为交易结果的状态代码。这些都会在后文正式定义。
 
 \subsection{子状态}
-从交易执行过程来看，伴随交易会产生一些特定的信息，我们称为交易子状态，用 $A$ 来表示:
+交易的执行过程中会累积产生一些特定的信息，我们称为\textit{交易子状态}，用 $A$ 来表示，它是个元组：
 \begin{equation}
 A \equiv (A_{\mathbf{s}}, A_{\mathbf{l}}, A_{\mathbf{t}}, A_{\mathrm{r}})
 \end{equation}
 
-元组内容包含自毁集合 $A_\mathbf{s}$: 一个在交易完成后被删除的账户集合。 $A_\mathbf{l}$ 是一系列的日志：在代码执行过程中是可归档，可索引的检查点，允许以太坊世界的外部旁观者(例如去中心化应用的前端)跟踪合约调用。$A_r$ 表示返回的余额，当使用 {\small SSTORE} 指令将非0的合约存贮空间置为0时,返回余额会增加。虽然不是立即返回余额，但可以部分抵消整个执行费用。
+\hypertarget{self_destruct_set_wordy_defn_A__s}{}元组内容包括自毁集合 $A_{\mathbf{s}}$：一组应该在交易完成后被删除的账户。\hypertarget{tx_log_series_wordy_defn_A__l}{} $A_{\mathbf{l}}$ 是一系列的日志：这是一些列针对 VM 代码执行的归档的、可索引的‘检查点’，允许以太坊世界的外部旁观者（例如去中心化应用的前端）来简单地跟踪合约调用。\hypertarget{tx_touched_accounts_wordy_defn_A__t}{} $A_{\mathbf{t}}$ 是交易所接触过的账户集合，其中的空账户可以在交易结束时删除。\hypertarget{refund_balance_defn_words_A__r}{}最后是 $A_{\mathrm{r}}$，也就是应该返还的余额；当使用 \hyperlink{SSTORE}{{\small SSTORE}} 指令将非 0 的合约存储空间重置为 0 时，这个余额会增加。虽然不是立即返还的余额，但可以部分抵消整体执行费用。
 
-我们定义空的子状态 $A^0$，它没有自毁、没有日志、返回余额为 0：
+我们定义空的子状态 $A^0$，它没有自毁、没有日志、没有接触过的账户且返还余额为 0：
 \begin{equation}
-A^0 \equiv (\varnothing, (), 0)
+A^0 \equiv (\varnothing,(), \varnothing, 0)
 \end{equation}
 
 \subsection{执行}
-
-执行过程中需要的燃料需要在交易进行之前支付,定义 $g_0$ :
+我们定义固有的 gas 消耗 $g_0$，它是需要在交易执行前支付的 gas 数量：
 \begin{align}
-g_0 \equiv {} & \sum_{i \in T_\mathbf{i}, T_\mathbf{d}} \begin{cases} G_{txdatazero} & \text{if} \quad i = 0 \\ G_{txdatanonzero} & \text{otherwise} \end{cases} \\
-{} & + \begin{cases} G_\text{txcreate} & \text{if} \quad T_t = \varnothing \\ 0 & \text{otherwise} \end{cases} \\
-{} & + G_{transaction}
+g_0 \equiv {} & \sum_{i \in T_{\mathbf{i}}, T_{\mathbf{d}}} \begin{cases} \hyperlink{G__txdatazero}{G_{\mathrm{txdatazero}}} & \text{if} \quad i = 0 \\ \hyperlink{G__txdatanonzero}{G_{\mathrm{txdatanonzero}}} & \text{otherwise} \end{cases} \\
+{} & + \begin{cases} \hyperlink{G__txcreate}{G_{\mathrm{txcreate}}} & \text{if} \quad T_{\mathrm{t}} = \varnothing \\ 0 & \text{otherwise} \end{cases} \\
+{} & + \hyperlink{G__transaction}{G_{\mathrm{transaction}}}
 \end{align}
 
-$T_\mathbf{i}$ 合约初始化EVM代码，$T_\mathbf{d}$ 是交易附带的关联数据，取决于交易是合约创建还是消息调用。如果这个交易是合约创建,那么会增加 $G_\text{txcreate}$ ，其它情况则不增加。$G$ 的详细定义见附录 \ref{app:fees}。
+其中，$T_{\mathbf{i}}$，$T_{\mathbf{d}}$ 是交易附带的关联数据的字节序列和 EVM 初始化代码的字节序列，具体取决于交易是合约创建还是消息调用。如果这个交易是合约创建，则会增加 $G_{\mathrm{txcreate}}$，否则不增加。$G$ 的完整定义参见附录 \ref{app:fees}。
 
 预支付的费用 $v_0$ 计算如下:
 \begin{equation}
-v_0 \equiv T_g T_p + T_v
+v_0 \equiv \hyperlink{tx_gas_limit_T__g}{T_{\mathrm{g}}} \hyperlink{tx_gas_price_T__p}{T_{\mathrm{p}}} + \hyperlink{tx_value_T__v}{T_{\mathrm{v}}}
 \end{equation}
 
-需满足下面关系:
+我们通过下列条件检查有效性：
 \begin{equation}
 \begin{array}[t]{rcl}
 S(T) & \neq & \varnothing \quad \wedge \\
 \boldsymbol{\sigma}[S(T)] & \neq & \varnothing \quad \wedge \\
-T_n & = & \boldsymbol{\sigma}[S(T)]_n \quad \wedge \\
-g_0 & \leqslant & T_g \quad \wedge \\
-v_0 & \leqslant & \boldsymbol{\sigma}[S(T)]_b \quad \wedge \\
-T_g & \leqslant & {B_H}_l - \ell(B_\mathbf{R})_u
+\linkdest{transaction_nonce}{}T_{\mathrm{n}} & = & \boldsymbol{\sigma}[S(T)]_{\mathrm{n}} \quad \wedge \\
+g_0 & \leqslant & T_{\mathrm{g}} \quad \wedge \\
+v_0 & \leqslant & \boldsymbol{\sigma}[S(T)]_{\mathrm{b}} \quad \wedge \\
+T_{\mathrm{g}} & \leqslant & {B_{H}}_{\mathrm{l}} - \hyperlink{ell}{\ell}(B_{\mathbf{R}})_{\mathrm{u}}
 \end{array}
 \end{equation}
 
+注意最后的条件: 交易的 gas 上限 $T_{\mathrm{g}}$ 和由 $\hyperlink{ell}{\ell}(B_{\mathbf{R}})_{\mathrm{u}}$ 所给定的这个区块先前已经使用的 gas 数量之和，不可以超过当前区块的\textbf{gasLimit} ${B_{H}}_{\mathrm{l}}$。
 
-注意最后的条件: 交易燃料限制 $T_{\mathrm{g}}$ <= 这个区块的燃料限制 ${B_H}_l$ - 这个区块之前的所有交易已使用的燃料 $\ell(B_\mathbf{R})_u$  。
-
-
-有效交易的执行起始于一个对状态不能撤回的改变：发送者账户 $S(T)$ 的随机数会加1，账户余额扣减部分预付费用 $T_gT_p$。计算过程中有效的燃料 $g$ = $T_g - g_0$。无论是合约创建还是消息调用后的的最终状态（可能等于当前的状态），这个改变是确定的且从来没有无效的:从这个观点看不会存在无效的交易。
+有效交易的执行起始于一个对状态不能撤回的改变：\hyperlink{account_nonce}{发送者账户的 nonce}，即 $S(T)$ 的 nonce 会加 1，并且从账户余额扣减预付费用 $T_{\mathrm{g}}T_{\mathrm{p}}$。进行实际计算的可用 gas $g$ 被定义为 $T_{\mathrm{g}} - g_0$。无论是合约创建还是消息调用，计算都会产生一个最终状态（可能等于当前的状态），这种改变是确定的且从来不会无效：这样来看，其实并不存在无效的交易。
 
 我们定义检查点状态 $\boldsymbol{\sigma}_0$：
 \begin{eqnarray}
 \boldsymbol{\sigma}_0 & \equiv & \boldsymbol{\sigma} \quad \text{except:} \\
-\boldsymbol{\sigma}_0[S(T)]_b & \equiv & \boldsymbol{\sigma}[S(T)]_b - T_g T_p \\
-\boldsymbol{\sigma}_0[S(T)]_n & \equiv & \boldsymbol{\sigma}[S(T)]_n + 1
+\boldsymbol{\sigma}_0[S(T)]_{\mathrm{b}} & \equiv & \boldsymbol{\sigma}[S(T)]_{\mathrm{b}} - T_{\mathrm{g}} T_{\mathrm{p}} \\
+\boldsymbol{\sigma}_0[S(T)]_{\mathrm{n}} & \equiv & \boldsymbol{\sigma}[S(T)]_{\mathrm{n}} + 1
 \end{eqnarray}
 
-
-从 $\boldsymbol{\sigma}_0$ 转变为 $\boldsymbol{\sigma}_P$ 和交易类型相关。不管它是创建合约还是消息调用,我们定义元组包括执行后的临时状态 $\boldsymbol{\sigma}_P$ ，剩余的燃料 $g'$ 和子状态 $A$ :
+从 $\boldsymbol{\sigma}_0$ 到 $\boldsymbol{\sigma}_{P}$ 的计算依赖于交易的类型。不管它是合约创建还是消息调用，我们都可以定义这样的元组，包含执行后的临时状态 $\boldsymbol{\sigma}_{P}$，剩余的 gas $g'$，子状态 $A$ 和状态代码 $z$：
 \begin{equation}
-(\boldsymbol{\sigma}_P, g', A) \equiv \begin{cases}
-\Lambda(\boldsymbol{\sigma}_0, S(T), T_o, &\\ \quad\quad g, T_p, T_v, T_\mathbf{i}, 0) & \text{if} \quad T_t = \varnothing \\
-\Theta_{3}(\boldsymbol{\sigma}_0, S(T), T_o, &\\ \quad\quad T_t, T_t, g, T_p, T_v, T_v, T_\mathbf{d}, 0) & \text{otherwise}
+(\boldsymbol{\sigma}_{P}, g', A, z) \equiv \begin{cases}
+\Lambda_{4}(\boldsymbol{\sigma}_0, S(T), T_{\mathrm{o}}, g, &\\ \quad\quad T_{\mathrm{p}}, T_{\mathrm{v}}, T_{\mathbf{i}}, 0, \top) & \text{if} \quad T_{\mathrm{t}} = \varnothing \\
+\Theta_{4}(\boldsymbol{\sigma}_0, S(T), T_{\mathrm{o}}, T_{\mathrm{t}}, T_{\mathrm{t}}, &\\ \quad\quad g, T_{\mathrm{p}}, T_{\mathrm{v}}, T_{\mathrm{v}}, T_{\mathbf{d}}, 0, \top) & \text{otherwise}
 \end{cases}
 \end{equation}
 
-其中 $g$ 是燃料上限扣除已有的交易消耗的燃料：
+其中 $g$ 是扣除掉合约存在所需要的基本 gas 数量之后的剩余 gas 数量：
 \begin{equation}
-g \equiv T_g - g_0
+g \equiv T_{\mathrm{g}} - g_0
+\end{equation}
+$T_{\mathrm{o}}$ 是交易的原始发起人，当一个消息调用或合约创建不是由交易所触发，而是来自于 EVM 代码的运行所触发时，这个原始发起人会与发送者不同（即在这种情况下，$T_{\mathrm{o}}$ 会与 $S(T)$ 不同，校订注）。
+
+注意，我们使用 $\Theta_{4}$ 和 $\Lambda_{4}$ 来表示只取用那组函数中的前 4 个函数的值，这最终表现为消息调用的输出（一个字节数组），且这个最终结果不会在交易计算的上下文中使用。
+
+在消息调用或合约创建被处理之后，在此过程中自毁的账户的返还余额计数也已经增加完成了。
+\begin{equation}
+	A'_{r} \equiv A_{r} + \sum_{i \in A_{s}} R_{selfdestruct}
 \end{equation}
 
-$T_o$ 是原始执行者，与和合约创建或消息调用(直接由交易触发)不同，可以通过 EVM 代码内部调用来执行。
-
-注意，我们使用 $\Theta_{3}$ 表示取函数值的前三个元素;最终结果是消息调用的输出（一个字节数组），最终结果并没有在交易的上下文使用。
-
-在消息调回或者创建合约被处理后，再确定退回的燃料后最终状态就确定了。 剩余的燃料 $g'$，再加上一些补偿，得到最终需要退回发送者的燃料 $g^*$:
-
+然后，就可以用剩余的 gas $g'$ 加上基于返还计数的补贴来按照原始比率确定返还给发送者的 gas 数量 $g^*$ 了。
 \begin{equation}
-g^* \equiv g' + \min \{ \Big\lfloor \dfrac{T_g - g'}{2} \Big\rfloor, A_r \}
+g^* \equiv g' + \min \left\{ \Big\lfloor \dfrac{T_{\mathrm{g}} - g'}{2} \Big\rfloor, \hyperlink{refund_balance_defn_words_A__r}{A'_{\mathrm{r}}} \right\}
 \end{equation}
 
-最终要退回发送者的燃料 $g^*$ 等于当前剩余的燃料 $g'$，再加一个补偿，这个补偿是 $A_r$ 和总使用燃料量 $T_g - g'$ 的一半中的小者。
+总共可返还的数量，是合法的剩余 gas $g'$ 加上 \hyperlink{refund_balance_defn_words_A__r}{$A_{\mathrm{r}}$} 与总消耗量 $T_{\mathrm{g}} - g'$ 的一半进行四舍五入后的结果中较小的那个值。所以 $g^*$ 就是交易执行后的总剩余 gas。
 
-燃料对应的以太币给了矿工，矿工地址是当前区块 \hyperlink{block}{$B$} 的受益者地址。我们定义预备最终状态 $\boldsymbol{\sigma}^*$ ，临时状态 $\boldsymbol{\sigma}_P$:
-
+交易花费的 gas 所对应的以太币会支付给矿工，它们的地址是由当前区块 $B$ 的 beneficiary 所指定的。所以我们基于临时状态 $\boldsymbol{\sigma}_{P}$ 来定义预备最终状态 $\boldsymbol{\sigma}^*$：
 \begin{eqnarray}
-\boldsymbol{\sigma}^* & \equiv & \boldsymbol{\sigma}_P \quad \text{except} \\
-\boldsymbol{\sigma}^*[S(T)]_b & \equiv & \boldsymbol{\sigma}_P[S(T)]_b + g^* T_p \\
-\boldsymbol{\sigma}^*[m]_b & \equiv & \boldsymbol{\sigma}_P[m]_b + (T_g - g^*) T_p \\
-m & \equiv & {B_H}_c
+\boldsymbol{\sigma}^* & \equiv & \boldsymbol{\sigma}_{P} \quad \text{except} \\
+\boldsymbol{\sigma}^*[S(T)]_{\mathrm{b}} & \equiv & \boldsymbol{\sigma}_{P}[S(T)]_{\mathrm{b}} + g^* T_{\mathrm{p}} \\
+\boldsymbol{\sigma}^*[m]_{\mathrm{b}} & \equiv & \boldsymbol{\sigma}_{P}[m]_{\mathrm{b}} + (T_{\mathrm{g}} - g^*) T_{\mathrm{p}} \\
+m & \equiv & {B_{H}}_{\mathrm{c}}
 \end{eqnarray}
 
-删除所有出现在自毁集合中的账户后，达到了最终状态 $\boldsymbol{\sigma}'$:
+在删除了所有出现在自毁列表中的账户或被接触过的空账户之后，即可达到最终状态 $\boldsymbol{\sigma}'$：
 \begin{eqnarray}
 \boldsymbol{\sigma}' & \equiv & \boldsymbol{\sigma}^* \quad \text{except} \\
-\forall i \in A_\mathbf{s}: \boldsymbol{\sigma}'[i] & \equiv & \varnothing
+\linkdest{self_destruct_list_A__s}{}\forall i \in A_{\mathbf{s}}: \boldsymbol{\sigma}'[i] & = & \varnothing \\
+\linkdest{touched_A__t}{}\forall i \in A_{\mathbf{t}}: \boldsymbol{\sigma}'[i] & = & \varnothing \quad\text{if}\quad \mathtt{\tiny DEAD}(\boldsymbol{\sigma}^*\kern -2pt, i)
 \end{eqnarray}
 
-最后，我们定义这次交易中总共使用的燃料 $\Upsilon^g$， 这次交易中创建的日志 $\Upsilon^\mathbf{l}$:
+\hypertarget{tx_total_gas_used_Upsilon_pow_g}{}\linkdest{Upsilon_pow_g}\hypertarget{tx_logs_Upsilon_pow_l}{}\linkdest{Upsilon_pow_l}\hypertarget{tx_status_Upsilon_pow_z}{}\linkdest{Upsilon_pow_z}最后，我们定义这个交易中总共使用的 gas $\Upsilon^{\mathrm{g}}$、这个交易中创建的日志 $\Upsilon^{\mathbf{l}}$ 和这个交易的状态代码 $\Upsilon^{\mathrm{z}}$：
 \begin{eqnarray}
-\Upsilon^g(\boldsymbol{\sigma}, T) & \equiv & T_g - g' \\
-\Upsilon^\mathbf{l}(\boldsymbol{\sigma}, T) & \equiv & A_\mathbf{l}
+\Upsilon^{\mathrm{g}}(\boldsymbol{\sigma}, T) & \equiv & T_{\mathrm{g}} - g^* \\
+\Upsilon^{\mathbf{l}}(\boldsymbol{\sigma}, T) & \equiv & \hyperlink{tx_log_series_wordy_defn_A__l}{A_{\mathbf{l}}} \\
+\Upsilon^{\mathrm{z}}(\boldsymbol{\sigma}, T) & \equiv & z
 \end{eqnarray}
 
-这些有助于后续讨论的交易收据。
+这些用来帮助我们定义 \hyperlink{Transaction_Receipt}{交易收据}，并且也将用在\hyperlink{Upsilon_pow_g2}{后续的}状态和 nonce 校验中。
 
-\section{合约创建} \label{ch:create}
+\section{合约创建}\label{ch:create}\hypertarget{endow}{}
 
 当创建一个账户时会有很多参数:发送者（$s$）、原始执行者（$o$）、可用的燃料（$g$）、燃料价格（$p$）、转账额度（$v$）、任意长度的字节数组 $\mathbf{i}$、EVM初始化代码、消息调用/合约创建的当前栈深度($e$) 。
 
