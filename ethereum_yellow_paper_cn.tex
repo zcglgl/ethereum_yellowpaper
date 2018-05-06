@@ -190,7 +190,7 @@ $10^{18}$ & Ether（以太） \\
 
 任意长度的序列通常用粗体小写字母表示，例如 $\mathbf{o}$ 表示消息调用中输出的字节序列数据。对于特别重要的值，可能会使用粗体大写字母。
 
-我们认为标量都是正整数且属于集合 $\mathbb{P}$。所有的字节序列属于集合 $\mathbb{B}$，附录 \ref{app:rlp} 给出了正式的定义。可以用下角标表示这样的序列集合的限定长度，因此，长度为 32 的字节序列使用 $\mathbb{B}_{32}$ 表示，所有比 $2^{256}$ 小的正整数使用 $\mathbb{P}_{256}$ 表示。详细定义参见 \ref{ch:block}。
+我们认为标量都是正整数且属于集合 $\mathbb{P}$。所有的字节序列属于集合 $\mathbb{B}$，附录 \ref{app:rlp} 给出了正式的定义。可以用下角标表示这样的序列集合的限定长度，因此，长度为 32 的字节序列使用 $\mathbb{B}_{32}$ 表示，所有比 $2^{256}$ 小的正整数使用 $\mathbb{P}_{256}$ 表示。详细定义参见 \hyperlink{block}{\ref{subsec:The_Block}}。
 
 使用方括号表示序列中的一个元素或子序列，例如 $\boldsymbol{\mu}_\mathbf{s}[0]$ 表示虚拟机栈中的第一个条目。对于子序列来说，使用省略号表示一定的范围，且含首尾限制，例如 $\boldsymbol{\mu}_\mathbf{m}[0..31]$ 表示虚拟机内存中的前 32 个条目。
 
@@ -326,7 +326,7 @@ T_{\mathbf{t}} \in \begin{cases} \mathbb{B}_{20} & \text{if} \quad T_{\mathrm{t}
 \mathbb{B}_{0} & \text{otherwise}\end{cases}
 \end{equation}
 
-\subsection{The Block}\linkdest{block}\label{subsec:The_Block}
+\subsection{区块}\linkdest{block}\label{subsec:The_Block}
 
 在以太坊中，区块是由以下部分组成的：一些相关信息片段组成的集合（称为 block \textit{header}，即区块头）；组成区块的交易 $\mathbf{T}$ 和 \hypertarget{ommerheaders}{}其它一些区块头 $\mathbf{U}$ （这是一些父区块与当前区块的爷爷辈区块相同的区块，这样的区块称为 \textit{ommers}\footnote{\textit{ommer} 的意思和自然界中的“父母的兄弟姐妹”最相近，参见 \url{https://nonbinary.miraheze.org/wiki/Gender_neutral_language\#Aunt.2FUncle}}）。区块头包含的的信息如下：
 
@@ -507,7 +507,7 @@ y \equiv \begin{cases}
 H'_{\mathrm{i}} &\equiv \max(H_{\mathrm{i}} - 3000000, 0)
 \end{align}
 
-Note that $\mindifficulty$ is the difficulty of the genesis block. The \textit{Homestead} difficulty parameter, $\homesteadmod$, is used to affect a dynamic homeostasis of time between blocks, as the time between blocks varies, as discussed below, as implemented in EIP-2 by \cite{EIP-2}. In the Homestead release, the exponential difficulty symbol, $\expdiffsymb$ causes the difficulty to slowly increase (every 100,000 blocks) at an exponential rate, and thus increasing the block time difference, and putting time pressure on transitioning to proof-of-stake. This effect, known as the "difficulty bomb", or "ice age", was explained in EIP-649 by \cite{EIP-649} and delayed and implemented earlier in EIP-2. $\homesteadmod$ was also modified in EIP-100 with the use of $x$, the adjustment factor above, and the denominator 9, in order to target the mean block time including uncle blocks by \cite{EIP-100}. Finally, in the Byzantium release, with EIP-649, the ice age was delayed by creating a fake block number, $H'_{\mathrm{i}}$, which is obtained by subtracting three million from the actual block number, which in other words reduced $\expdiffsymb$ and the time difference between blocks, in order to allow more time to develop proof-of-stake and preventing the network from "freezing" up.
+注意，$\mindifficulty$ 是创世区块的难度值。就像下面介绍的那样，\textit{Homestead} 难度值参数 $\homesteadmod$ 被用来影响出块时间的动态平衡，它已经通过由 \cite{EIP-2} 提出的 EIP-2 实现了。在 Homestead 版本中，难度符号 $\expdiffsymb$ 会越来越快地使难度值缓慢增长（每10万个区块），从而增加区块时间差别，也为向权益证明（proof-of-stake）的切换增加了时间压力。这个效果就是所谓的“难度炸弹”（"difficulty bomb"）或“冰河时期”（"ice age"）在由 \cite{EIP-649} 提出的 EIP-649 中进行了解释，并用来推迟早先在 EIP-2 中的实现。$\homesteadmod$ 也在 EIP-100 通过使用 $x$（即上面公式中的矫正参数）和分母 9 进行了修改，用来达到由 \cite{EIP-100} 提出的对包含叔区块（uncle blocks）在内的平均出块时间的调整效果。最终，在拜占庭版本中，伴随 EIP-649，我们通过伪造一个区块号 $H'_{\mathrm{i}}$ 来延迟冰河时期的来临。这是通过用实际区块号减去 300 万来获得的。换句话说，就是减少 $\expdiffsymb$ 和区块间的时间间隔，来为权益证明的开发争取更多的时间并防止网络被“冻结”。
 
 \hypertarget{block_gas_limit_H__l}{}区块头 $H$ 的 gas 限制 $H_{\mathrm{l}}$ 需要满足下列条件：
 \begin{eqnarray}
@@ -529,11 +529,11 @@ n \leqslant \frac{2^{256}}{H_{\mathrm{d}}} \quad \wedge \quad m = H_{\mathrm{m}}
 \end{equation}
 with $(n, m) = \mathtt{PoW}(H_{\hcancel{n}}, H_{\mathrm{n}}, \mathbf{d})$.
 
-\hypertarget{block_header_without_nonce_and_mixmash_h__cancel_n}{}\linkdest{H_cancel_n}其中 $H_{\hcancel{n}}$ 是新区块的区块头，但不包含随机数和混合哈希值，$\mathbf{d}$  是当前的数据集合 DAG(有向无环图)，需要去计算混合哈希， $\mathtt{PoW}$ 是工作量证明函数（见 \ref{ch:pow}）：第一个元素用于计算混合哈希值，以证明使用了一个正确的 DAG，第 2 个元素是伪随机数,依赖于 $H$ 及 $\mathbf{d}$ 。给定一个范围在$[0, 2^{64})$ 的均匀分布，则求解时间和难度 $H_{\mathrm{d}}$ 成比例。
+\hypertarget{block_header_without_nonce_and_mixmash_h__cancel_n}{}\linkdest{H_cancel_n}其中，$H_{\hcancel{n}}$ 是\textit{不包含} nonce 和 mixHash 的新区块的区块头 $H$；$\mathbf{d}$ 是当前的 DAG（即有向无环图，是用来计算 mixHash 的一种大型数据集合）和工作量证明函数 $\mathtt{PoW}$（参见 \ref{ch:pow}）：这取决于一个数组的值，数组的第一个元素是用来证明使用了一个正确的 DAG 的混合哈希（mix-hash）；数组的第二个元素是伪随机数，密码学依赖于 $H$ 及 $\mathbf{d}$。给定一个范围在 $[0, 2^{64})$ 的均匀分布，则求解时间和难度 $H_{\mathrm{d}}$ 是成比例变化的。
 
-这就是区块链安全基础，这也是一个恶意节点不能用其新创建的区块中重写历史数据的重要原因。因为这个随机数必须满足这些条件，且因为条件依赖于这个区块的内容和相关交易，创建新的合法的区块是困难且耗时的，需要超过所有诚实矿工的算力总和。
+这就是区块链的安全基础，也是一个恶意节点不能用其新创建的区块来覆盖（“重写”）历史数据的重要原因。因为这个随机数必须满足这些条件，且因为条件依赖于这个区块的内容和相关交易，创建新的合法的区块是困难且耗时的，需要超过所有诚实矿工的算力总和。
 
-\hypertarget{block_header_validity_function}{}因此,我们定义这个区块头的验证函数 $V(H)$ 为：
+\hypertarget{block_header_validity_function}{}这样，我们定义这个区块头的验证函数 $V(H)$ 为：
 \begin{eqnarray}
 V(H) & \equiv &  n \leqslant \frac{2^{256}}{H_{\mathrm{d}}} \wedge m = H_{\mathrm{m}} \quad \wedge \\
 \nonumber & & H_{\mathrm{d}} = D(H) \quad \wedge \\
@@ -549,7 +549,7 @@ V(H) & \equiv &  n \leqslant \frac{2^{256}}{H_{\mathrm{d}}} \wedge m = H_{\mathr
 
 此外，\textbf{extraData} 最多 32 字节。
 
-\section{燃料和支付} \label{ch:payment}
+\section{Gas 及其支付} \label{ch:payment}
 
 为了避免网络滥用及回避由于图灵完整性而带来的一些不可避免的问题，在以太坊中所有的程序执行都需要费用。各种操作费用以 \textit{gas} (详见附录 \ref{app:fees} )为单位计算。任意的程序片段（包括合约创建、信息调回、利用及访问账户存储、在虚拟机上执行操作等）都可以根据规则计算出消耗的燃料数量。
 
