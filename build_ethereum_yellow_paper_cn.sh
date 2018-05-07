@@ -10,7 +10,7 @@ SHA=`git rev-parse --short --verify HEAD`
 DATE=`git show -s --format="%cd" --date=short HEAD`
 # REV="$SHA - $DATE"
 # chinese version's origin version
-REV="47d2826 - 2018-04-26"
+REV="f72032b - 2018-05-04"
 echo "\def\YellowPaperVersionNumber{$REV}" >> Options.tex
 
 fi

@@ -684,19 +684,19 @@ m & \equiv & {B_{H}}_{\mathrm{c}}
 
 \section{合约创建}\label{ch:create}\hypertarget{endow}{}
 
-当创建一个账户时会有很多参数:发送者（$s$）、原始执行者（$o$）、可用的燃料（$g$）、燃料价格（$p$）、转账额度（$v$）、任意长度的字节数组 $\mathbf{i}$、EVM初始化代码、消息调用/合约创建的当前栈深度($e$) 。
+创建一个账户需要很多固有参数：发送者（$s$）、原始交易人（$o$）、可用的 gas（$g$）、gas 价格（$p$）、转账额度（$v$）、任意长度的字节数组 $\mathbf{i}$、EVM初始化代码、消息调用/合约创建的当前栈深度（$e$）以及对状态进行修改的许可（$w$）。
 
-我们定义创建函数为函数 $\Lambda$，相关的变量有状态 $\boldsymbol{\sigma}$ ，包含新状态、剩余燃料及交易子状态 $(\boldsymbol{\sigma}', g', A)$ (详见第6小结):
+我们定义创建函数为函数 $\Lambda$，它将使用上述参数，和状态 $\boldsymbol{\sigma}$ 一起来计算出一个新的元组。就像第 \ref{ch:transactions} 节所介绍的那样，这个新的元组包含新的状态、剩余的 gas、交易子状态以及一个错误消息 $(\boldsymbol{\sigma}', g', A, \mathbf{o})$：
 \begin{equation}
-(\boldsymbol{\sigma}', g', A) \equiv \Lambda(\boldsymbol{\sigma}, s, o, g, p, v, \mathbf{i}, e)
+(\boldsymbol{\sigma}', g', A, z, \mathbf{o}) \equiv \Lambda(\boldsymbol{\sigma}, s, o, g, p, v, \mathbf{i}, e, w)
 \end{equation}
 
-这个新账户的地址被定义为包含发送者和随机数 RLP 编码的 Keccak 哈希的最边160位。因此我们定义新帐户 $a$ 的地址:
+新账户的地址是一个哈希值的最右边 160 位，这个哈希值是由一个仅包含发送者地址和\hyperlink{account_nonce}{其账户 nonce} 的结构进行 \hyperlink{rlp}{RLP} 编码之后再进行 Keccak 哈希计算所得到的。我们可以定义由此得来的新帐户的地址 $a$：
 \begin{equation}
-a \equiv \mathcal{B}_{96..255}\Big(\mathtt{\tiny KEC}\Big(\mathtt{\tiny RLP}\big(\;(s, \boldsymbol{\sigma}[s]_n - 1)\;\big)\Big)\Big)
+a \equiv \mathcal{B}_{96..255}\Big(\mathtt{\tiny KEC}\Big(\mathtt{\tiny RLP}\big(\;(s, \boldsymbol{\sigma}[s]_{\mathrm{n}} - 1)\;\big)\Big)\Big)
 \end{equation}
 
-其中 $\mathtt{\tiny KEC}$ 是Keccak 256 位哈希函数，$\mathtt{\tiny RLP}$ 是 RLP 编码函数，$\mathcal{B}_{a..b}(X)$ 表示取二进制数据 $X$ 位数为范围 $[a, b]$ 的值,$\boldsymbol{\sigma}[x]$ 是地址 $x$ 的状态，$\varnothing$ 表示地址不存在时的状态。注意,我们使用的是一个比发送者随机数要小的值；我们断言会在在这个合约创建是前会增加发送者账户的随机数，因此在刚开始在交易或VM操作中使用的随机数就是发送者的随机数。
+其中 $\mathtt{\tiny KEC}$ 是 Keccak 256 哈希函数，$\mathtt{\tiny RLP}$ 是 RLP 编码函数，$\mathcal{B}_{a..b}(X)$ 表示取二进制数据 $X$ 的位数范围 $[a, b]$ 的值，$\boldsymbol{\sigma}[x]$ 则是地址 $x$ 的状态，或者 $\varnothing$ 表示什么都不存在。注意，我们使用的是一个比发送者 nonce 要小的值（减了 1）；因为我们认定我们已经在这个调用之前对发送者的 nonce 加了 1，并且在一个可靠的交易执行或 VM 操作开始时也会对发送者的 nonce 加 1。
 
 账户的随机数开始被定义为0，余额为传递的转账值，存储空间为空，哈希代码为Keccak 256位的空字符串哈希值；发送者的余额会减去转账值。这个变化的状态变成 $\boldsymbol{\sigma}^*$:
 \begin{equation}
