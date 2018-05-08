@@ -123,7 +123,7 @@
 
 \section{区块链范式} \label{ch:overview}
 
-以太坊在整体上可以看作一个基于交易的状态机：起始于一个创世区块（Genesis）状态，然后随着交易的执行状态逐步改变一直到最终状态，这个最终状态是以太坊世界的权威“版本”。状态中包含的信息有：账户余额、名誉度、信誉度、现实世界的附属数据等；简而言之，能包含电脑可以描绘的任何信息。而交易则成为了连接两个状态的有效桥梁；“有效”非常重要——因为无效的状态改变远超过有效的状态改变。例如：无效的状态改变可能是减少账号余额，但是没有在其它账户上加上同等的额度。一个有效的状态转换是通过交易进行的。可以正式地描述为：
+以太坊在整体上可以看作一个基于交易的状态机：起始于一个创世区块（Genesis）状态，然后随着交易的执行状态逐步改变一直到最终状态，这个最终状态是以太坊世界的权威“版本”。状态中包含的信息有：账户余额、名誉度、信誉度、现实世界的附属数据等；简而言之，能包含电脑可以描绘的任何信息。而交易则成为了连接两个状态的有效桥梁；“有效”非常重要——因为无效的状态改变远超过有效的状态改变。例如：无效的状态改变可能是减少账户余额，但是没有在其它账户上加上同等的额度。一个有效的状态转换是通过交易进行的。可以正式地描述为：
 \begin{equation}
 \linkdest{Upsilon_state_transition}\linkdest{Upsilon}\boldsymbol{\sigma}_{t+1} \equiv \Upsilon(\boldsymbol{\sigma}_{t}, T)
 \end{equation}
@@ -281,7 +281,7 @@ p(a) \equiv  \big(\texttt{\small KEC}(a), \texttt{\small RLP}\big( (\boldsymbol{
 \item[gasPrice]\linkdest{tx_gas_price_T__p}{} 为执行这个交易所需要进行的计算步骤消耗的每单位 \textit{gas} 的价格，以 Wei 为单位，由 $T_{\mathrm{p}}$ 表示。
 \item[gasLimit]\linkdest{tx_gas_limit_T__g}{} 用于执行这个交易的最大 gas 数量。这个值须在交易开始前设置，且设定后不能再增加，由 $T_{\mathrm{g}}$ 表示。
 \item[to]\linkdest{tx_to_address_T__t}{} 160 位的消息调用接收者地址；对与合约创建交易，用 $\varnothing$ 表示 $\mathbb{B}_0$ 的唯一成员。此字段由 $T_{\mathrm{t}}$ 表示
-\item[value]\linkdest{tx_value_T__v}{} 转移到接收者账户的 Wei 的数量；对于合约创建，则代表给新建合约地址的捐款。由 $T_{\mathrm{v}}$ 表示。
+\item[value]\linkdest{tx_value_T__v}{} 转移到接收者账户的 Wei 的数量；对于合约创建，则代表给新建合约地址的初始捐款。由 $T_{\mathrm{v}}$ 表示。
 \item[v, r, s] 与交易签名相符的若干数值，用于确定交易的发送者，由 \linkdest{T__w_T__r_T__s}{$T_{\mathrm{w}}$，$T_{\mathrm{r}}$ 和 $T_{\mathrm{s}}$ 表示}。详见附录 \ref{app:signing}。
 \end{description}
 
@@ -552,9 +552,9 @@ V(H) & \equiv &  n \leqslant \frac{2^{256}}{H_{\mathrm{d}}} \wedge m = H_{\mathr
 
 \section{Gas 及其支付} \label{ch:payment}
 
-为了避免网络滥用及回避由于图灵完整性而带来的一些不可避免的问题，在以太坊中所有的程序执行都需要费用。各种操作费用以 \textit{gas}（详见附录 \ref{app:fees} 中与不同计算相关的费用说明）为单位计算。任意的程序片段（包括合约创建、消息调用、分配资源以及访问账户存储、在虚拟机上执行操作等）都会有一个普遍认同的 gas 消耗。
+为了避免网络滥用及回避由于图灵完整性而带来的一些不可避免的问题，在以太坊中所有的程序执行都需要费用。各种操作费用以 \textit{gas}（详见附录 \ref{app:fees} 中与不同计算相关的费用说明）为单位计算。任意的程序片段（包括合约创建、消息调用、分配资源以及访问账户 storage、在虚拟机上执行操作等）都会有一个普遍认同的 gas 消耗。
 
-每一个交易都要指定一个 gas 上限：\textbf{gasLimit}。这些 gas 会从发送者的账户余额中扣除。这种购买是通过同样在交易中指定的 \textbf{gasPrice} 来完成的。如果这个账户的余额不能支持这样的购买，交易会被视为无效交易。之所以将其命名为 \textbf{gasLimit}，是因为剩余的 gas 会在交易完成后被返还（与购买时同样价格）到发送者账户。Gas 不会在交易执行之外存在，因此对于可信任的账户，应该设置一个相对较高的 gas 上限。
+每一个交易都要指定一个 gas 上限：\textbf{gasLimit}。这些 gas 会从发送者的账户的 balance 中扣除。这种购买是通过同样在交易中指定的 \textbf{gasPrice} 来完成的。如果这个账户的 balance 不能支持这样的购买，交易会被视为无效交易。之所以将其命名为 \textbf{gasLimit}，是因为剩余的 gas 会在交易完成后被返还（与购买时同样价格）到发送者账户。Gas 不会在交易执行之外存在，因此对于可信任的账户，应该设置一个相对较高的 gas 上限。
 
 通常来说，以太币（Ether）是用来购买 gas 的，未返还的部分就会移交到 \textit{beneficiary} 的地址（即一般由矿工所控制的一个账户地址）。交易者可以随意指定 \textbf{gasPrice}，然而矿工也可以任意地忽略某个交易。一个高 gas 价格的交易将花费发送者更多的以太币，也就将移交给矿工更多的以太币，因此这个交易自然会被更多的矿工选择打包进区块。通常来说，矿工会选择公告他们执行交易的最低 gas 价格，交易者们也就可以据此来提供一个具体的价格。因此，会有一个（加权的）最低的可接受 gas 价格分布，交易者们则需要在降低 gas 价格和使交易能最快地被矿工打包间进行权衡。
 
@@ -569,7 +569,7 @@ V(H) & \equiv &  n \leqslant \frac{2^{256}}{H_{\mathrm{d}}} \wedge m = H_{\mathr
 \item 交易的签名是有效的；
 \item \hyperlink{transaction_nonce}{交易的 nonce} 是有效的（等于\hyperlink{account_nonce}{发送者账户当前的 nonce}）；
 \item gas 上限不小于交易所要使用的 gas $g_0$;
-\item 发送者账户的余额应该不少于实际费用 $v_0$，且需要提前支付。
+\item 发送者账户的 balance 应该不少于实际费用 $v_0$，且需要提前支付。
 \end{enumerate}
 
 这样，我们可以定义状态转移函数 \hyperlink{Upsilon_state_transition}{$\Upsilon$}，其中 $T$ 表示交易，$\boldsymbol{\sigma}$ 表示状态：
@@ -585,7 +585,7 @@ V(H) & \equiv &  n \leqslant \frac{2^{256}}{H_{\mathrm{d}}} \wedge m = H_{\mathr
 A \equiv (A_{\mathbf{s}}, A_{\mathbf{l}}, A_{\mathbf{t}}, A_{\mathrm{r}})
 \end{equation}
 
-\hypertarget{self_destruct_set_wordy_defn_A__s}{}元组内容包括自毁集合 $A_{\mathbf{s}}$：一组应该在交易完成后被删除的账户。\hypertarget{tx_log_series_wordy_defn_A__l}{} $A_{\mathbf{l}}$ 是一系列的日志：这是一些列针对 VM 代码执行的归档的、可索引的‘检查点’，允许以太坊世界的外部旁观者（例如去中心化应用的前端）来简单地跟踪合约调用。\hypertarget{tx_touched_accounts_wordy_defn_A__t}{} $A_{\mathbf{t}}$ 是交易所接触过的账户集合，其中的空账户可以在交易结束时删除。\hypertarget{refund_balance_defn_words_A__r}{}最后是 $A_{\mathrm{r}}$，也就是应该返还的余额；当使用 \hyperlink{SSTORE}{{\small SSTORE}} 指令将非 0 的合约存储空间重置为 0 时，这个余额会增加。虽然不是立即返还的余额，但可以部分抵消整体执行费用。
+\hypertarget{self_destruct_set_wordy_defn_A__s}{}元组内容包括自毁集合 $A_{\mathbf{s}}$：一组应该在交易完成后被删除的账户。\hypertarget{tx_log_series_wordy_defn_A__l}{} $A_{\mathbf{l}}$ 是一系列的日志：这是一些列针对 VM 代码执行的归档的、可索引的‘检查点’，允许以太坊世界的外部旁观者（例如去中心化应用的前端）来简单地跟踪合约调用。\hypertarget{tx_touched_accounts_wordy_defn_A__t}{} $A_{\mathbf{t}}$ 是交易所接触过的账户集合，其中的空账户可以在交易结束时删除。\hypertarget{refund_balance_defn_words_A__r}{}最后是 $A_{\mathrm{r}}$，也就是应该返还的余额；当使用 \hyperlink{SSTORE}{{\small SSTORE}} 指令将非 0 的合约 storage 重置为 0 时，这个余额会增加。虽然不是立即返还的余额，但可以部分抵消整体执行费用。
 
 我们定义空的子状态 $A^0$，它没有自毁、没有日志、没有接触过的账户且返还余额为 0：
 \begin{equation}
@@ -684,7 +684,7 @@ m & \equiv & {B_{H}}_{\mathrm{c}}
 
 \section{合约创建}\label{ch:create}\hypertarget{endow}{}
 
-创建一个账户需要很多固有参数：发送者（$s$）、原始交易人（$o$）、可用的 gas（$g$）、gas 价格（$p$）、转账额度（$v$）、任意长度的字节数组 $\mathbf{i}$、EVM初始化代码、消息调用/合约创建的当前栈深度（$e$）以及对状态进行修改的许可（$w$）。
+创建一个账户需要很多固有参数：发送者（$s$）、原始交易人（$o$）、可用的 gas（$g$）、gas 价格（$p$）、endowment（$v$，即初始捐款）、任意长度的字节数组 $\mathbf{i}$、EVM初始化代码、消息调用/合约创建的当前栈深度（$e$）以及对状态进行修改的许可（$w$）。
 
 我们定义创建函数为函数 $\Lambda$，它将使用上述参数，和状态 $\boldsymbol{\sigma}$ 一起来计算出一个新的元组。就像第 \ref{ch:transactions} 节所介绍的那样，这个新的元组包含新的状态、剩余的 gas、交易子状态以及一个错误消息 $(\boldsymbol{\sigma}', g', A, \mathbf{o})$：
 \begin{equation}
@@ -698,57 +698,62 @@ a \equiv \mathcal{B}_{96..255}\Big(\mathtt{\tiny KEC}\Big(\mathtt{\tiny RLP}\big
 
 其中 $\mathtt{\tiny KEC}$ 是 Keccak 256 哈希函数，$\mathtt{\tiny RLP}$ 是 RLP 编码函数，$\mathcal{B}_{a..b}(X)$ 表示取二进制数据 $X$ 的位数范围 $[a, b]$ 的值，$\boldsymbol{\sigma}[x]$ 则是地址 $x$ 的状态，或者 $\varnothing$ 表示什么都不存在。注意，我们使用的是一个比发送者 nonce 要小的值（减了 1）；因为我们认定我们已经在这个调用之前对发送者的 nonce 加了 1，并且在一个可靠的交易执行或 VM 操作开始时也会对发送者的 nonce 加 1。
 
-账户的随机数开始被定义为0，余额为传递的转账值，存储空间为空，哈希代码为Keccak 256位的空字符串哈希值；发送者的余额会减去转账值。这个变化的状态变成 $\boldsymbol{\sigma}^*$:
+账户的 nonce 被初始定义为 1，balance 为交易传入的值，storage 为空，codeHash 为空字符串的 Keccak 256 位哈希值；发送者的 balance 会减去转账值。于是这个变化的状态就成为 $\boldsymbol{\sigma}^*$：
 \begin{equation}
 \boldsymbol{\sigma}^* \equiv \boldsymbol{\sigma} \quad \text{except:}
 \end{equation}
 \begin{eqnarray}
-\boldsymbol{\sigma}^*[a] &\equiv& \big( 0, v + v', \mathtt{\tiny TRIE}(\varnothing), \mathtt{\tiny KEC}\big(()\big) \big) \\
-\boldsymbol{\sigma}^*[s]_b &\equiv& \boldsymbol{\sigma}[s]_b - v
+\boldsymbol{\sigma}^*[a] &=& \big( 1, v + v', \mathtt{\tiny \hyperlink{trie}{TRIE}}(\varnothing), \mathtt{\tiny KEC}\big(()\big) \big) \\
+\boldsymbol{\sigma}^*[s] &=& \begin{cases}
+\varnothing & \text{if}\ \boldsymbol{\sigma}[s] = \varnothing \ \wedge\ v = 0 \\
+\mathbf{a}^* & \text{otherwise}
+\end{cases} \\
+\mathbf{a}^* &\equiv& (\boldsymbol{\sigma}[s]_{\mathrm{n}}, \boldsymbol{\sigma}[s]_{\mathrm{b}} - v, \boldsymbol{\sigma}[s]_{\mathbf{s}}, \boldsymbol{\sigma}[s]_{\mathrm{c}})
 \end{eqnarray}
 
-其中$v'$ 是账户在交易之前就有的余额:
+其中 $v'$ 是账户在交易之前就有的余额，对应于它先前就已经存在的情况：
 \begin{equation}
 v' \equiv \begin{cases}
 0 & \text{if} \quad \boldsymbol{\sigma}[a] = \varnothing\\
-\boldsymbol{\sigma}[a]_b & \text{otherwise}
+\boldsymbol{\sigma}[a]_{\mathrm{b}} & \text{otherwise}
 \end{cases}
 \end{equation}
 
-最后，这个账户是通过执行初始化账户的 EVM 代码 $\mathbf{i}$ （执行模型详见小结 \ref{ch:model} ）来初始化的。代码执行可以影响一些事件：可以改变当前账户的存储，能创建更多的账户,执行更多的消息调用。代码执行函数 $\Xi$ 可以得到一个元组,包括结果状态 $\boldsymbol{\sigma}^{**}$，可用的剩余燃料 $g^{**}$，子状态 $A$，以及账户 $\mathbf{o}$ 的代码。    赋值到最后的状态的数组中，有效的剩余燃料，当前产生的子状态 $A$ 和账号代码本身 $\mathbf{o}$。
+%It is asserted that the state database will also change such that it defines the pair $(\mathtt{\tiny KEC}(\mathbf{b}), \mathbf{b})$.
+
+最终，账户是根据执行模型（参见第 \ref{ch:model} 章）通过执行账户初始化的 EVM 代码 $\mathbf{i}$ 来初始化的。代码的执行可以产生一些内部执行状态以外的事件，包括：更改账户的 storage，创建更多的账户，以及进行更多的消息调用。用代码执行函数 $\Xi$ 可以得到一个元组，包括结果状态 $\boldsymbol{\sigma}^{**}$，可用的剩余 gas $g^{**}$，累积的子状态 $A$ 以及账户的代码 $\mathbf{o}$。
 
 \begin{equation}
-(\boldsymbol{\sigma}^{**}, g^{**}, A, \mathbf{o}) \equiv \Xi(\boldsymbol{\sigma}^*, g, I) \\
+(\boldsymbol{\sigma}^{**}, g^{**}, A, \mathbf{o}) \equiv \Xi(\boldsymbol{\sigma}^*, g, I, \{s, a\}) \\
 \end{equation}
-其中 $I$ 包含执行环境的相关参数，这些参数在小结 \ref{ch:model} 中有详细定义:
+\pagebreak[1]其中 $I$ 包含了\hyperlink{exec_env}{执行环境}的相关参数：\pagebreak[1]
 \begin{eqnarray}
-I_a & \equiv & a \\
-I_o & \equiv & o \\
-I_p & \equiv & p \\
-I_\mathbf{d} & \equiv & () \\
-I_s & \equiv & s \\
-I_v & \equiv & v \\
-I_\mathbf{b} & \equiv & \mathbf{i} \\
-I_e & \equiv & e
+I_{\mathrm{a}} & \equiv & a \\
+I_{\mathrm{o}} & \equiv & o \\
+I_{\mathrm{p}} & \equiv & p \\
+I_{\mathbf{d}} & \equiv & () \\
+I_{\mathrm{s}} & \equiv & s \\
+\hyperlink{I__v}{I_{\mathrm{v}}} & \equiv & v \\
+I_{\mathbf{b}} & \equiv & \mathbf{i} \\
+I_{\mathrm{e}} & \equiv & e \\
+I_{\mathrm{w}} & \equiv & w
 \end{eqnarray}
 
-如果没有输入数据,使用 $I_\mathbf{d}$ 表示空的元组。$I_H$ 没有什么特别的，它由区块链决定。
+由于这个调用没有任何输入数据，$I_\mathbf{d}$ 为空的元组。$I_H$ 则没有特别之处，由区块链所决定。
 
+代码执行会消耗 gas，且 gas 不能低于 0，因此执行可能会在自然停止之前结束。在这个（以及其它几个）异常情况，我们称之为发生了 gas 不足（out-of-gas，OOG）异常：计算后的状态将由空集合 $\varnothing$ 表示，整个创建操作将不会影响状态，就像刚开始尝试创建时那样。
 
-代码执行会消耗燃料，且燃料不能低于 0，因此程序执行可能会在自然终止之前退出。在这个（以及其它几个）异常情况，我们称发生了燃料不足（out-of-gas，OOG）异常：演进的状态变成空集合 $\varnothing$，整个创建操作对状态没有影响,状态就像尝试创建合约之前一样。
-
-如果这个初始化代码成功地执行完，那么对应的合约创建也会被支付。代码保存费用 $c$ 和创建的合约代码大小成正比:
-
+如果这个初始化代码成功地执行完，那么对应的合约创建费用也会支付。这个代码保存费用 $c$ 与创建出来的合约代码大小成正比：
 \begin{equation}
 c \equiv G_{codedeposit} \times |\mathbf{o}|
 \end{equation}
 
-如果没有足够的燃料支付这些，例如 $g^{**} < c$，就会抛出燃料不足异常。
+如果没有足够的剩余 gas 来支付这个费用，也就是说如果 $g^{**} < c$，就会产生 gas 不足异常。
 
+发生这样的异常后，剩余 gas 将变为 0。也就是说，如果合约创建是作为对交易的接受来处理的，那么它就不会影响合约创建的固有费用的支付，就是肯定会支付。然而，当 gas 不足时，交易中附带的金额并不会转移到被取消的合约地址。
 
-发生这样的异常后，剩余燃料将变为0。 如果合约创建是用于接受一个交易，它不会影响合约创建内部消耗的燃料,无论如何都必须支付。然而，当燃料不足时，并不会给这个合约地址转账。
+如果没有出现这样的异常，那么剩余的 gas 会返还给最原始的交易发起人，对状态的改变也将永久保存。这样，我们可以指定结果状态、gas、子状态和状态代码为 $(\boldsymbol{\sigma}', g', A, z)$：
 
-如果没有出现这样的异常,那么剩余的燃料会退会给最原始的发送者，改变后的新状态也会永久保存。最终状态、燃料和子状态 $(\boldsymbol{\sigma}', g', A)$ 的关系如下:
 \begin{align}
 \quad g' &\equiv \begin{cases}
 0 & \text{if} \quad F \\
@@ -757,56 +762,68 @@ g^{**} - c & \text{otherwise} \\
 \quad \boldsymbol{\sigma}' &\equiv  \begin{cases}
 \boldsymbol{\sigma} & \text{if} \quad F \\
 \boldsymbol{\sigma}^{**} \quad \text{except:} & \\
-\quad\boldsymbol{\sigma}'[a]_c = \texttt{\small KEC}(\mathbf{o}) & \text{otherwise}
+\quad\boldsymbol{\sigma}'[a] = \varnothing & \text{if} \quad \mathtt{\tiny DEAD}(\boldsymbol{\sigma}^{**}, a) \\
+\boldsymbol{\sigma}^{**} \quad \text{except:} & \\
+\quad\boldsymbol{\sigma}'[a]_{\mathrm{c}} = \texttt{\small KEC}(\mathbf{o}) & \text{otherwise}
+\end{cases} \\
+\quad z &\equiv \begin{cases}
+0 & \text{if} \quad \boldsymbol{\sigma}^{**} = \varnothing \lor g^{**} < c \\
+1 & \text{otherwise}
 \end{cases} \\
 \nonumber \text{where} \\
-F &\equiv \big(\boldsymbol{\sigma}^{**} = \varnothing \ \vee\  g^{**} < c \ \vee\  |\mathbf{o}| > 24576\big)
+F &\equiv \big((\boldsymbol{\sigma}^{**} = \varnothing \ \wedge\ \mathbf{o} = \varnothing) \vee\  g^{**} < c \ \vee\  |\mathbf{o}| > 24576\big)
 \end{align}
 
-上述 $\boldsymbol{\sigma}'$ 的公式,表明了执行代码初始化得到的最终字节序列 $\mathbf{o}$,就是新创建账户的代码体。
+对于确定 $\boldsymbol{\sigma}'$ 的例外，由初始化代码的执行结果字节序列 $\mathbf{o}$ 所决定，它就是新创建账户的最终代码。
 
-当合约成功创建时，如果有转账,对应的转账也会转到合约中;如果没有转账，则仅是合约创建。
+注意，这是意图达到这样的结果：要么带着初始捐款（endowment）成功创建合约；要么不会创建任何合约且不会进行转账。
 
 \subsection{细微之处}
-有一种情况需要注意，当初始化代码正在执行时，新创建的地址出现了,但还没有内部的代码时。在这个时间内,任意消息调用不会引起代码执行。如果这个初始化执行结束于一个 {\small SELFDESTRUCT} 指令，这个账号会在交易执行完前将被删除，这个行为是无意义的。对于 一个正常的 {\small STOP} 指令代码，或者返回的代码是空的，这时候会出现一个僵尸账户，而且账户中剩余的余额将被永远被锁定在这个僵尸账户中。
+注意，在初始化代码执行过程中，一个新创建的地址会出现，但还没有内部的代码\footnote{在初始化代码的执行过程中，当前地址上的 \texttt{EXTCODESIZE} 也就是账户代码的长度应该返回 0。而 \texttt{CODESIZE} 则应该返回初始化代码的长度。（就像\ref{subsec:instruction-set}中定义的那样。）}。因此在这段时间内，任何消息调用都不会引发代码执行。如果这个初始化执行结束于一个 {\small SELFDESTRUCT} 指令，那么这个账户会在交易完成前被删除，这种情况是否合理已在讨论中。对于一个正常的 {\small STOP} 指令代码，或者返回的代码是空的，这时候会出现一个僵尸账户，而且账户中剩余的余额将被永远地锁定在这个僵尸账户中。
 
 \section{消息调用} \label{ch:call}
-当执行消息调用时需要多个参数：发送者（$s$）、交易发起人（$o$）、接受者（$r$）、执行代码的账户（$c$,通常就是接受者）、可用的燃料（$g$）、转账额度（$v$）、燃料价格（$p$）、函数调用的一个任意长度字节的数组 $\mathbf{d}$ 的输入数据以及消息调用/合约创建的当前栈($e$)深度。
+当执行消息调用时需要多个参数：发送者（$s$）、交易发起人（$o$）、接收者（$r$）、执行代码的账户（$c$，通常与接收者相同）、可用的 gas（$g$）、转账额度（$v$）、gas 价格（$p$）、函数调用的输入数据（一个任意长度的字节数组 $\mathbf{d}$）、消息调用/合约创建的当前栈深度（$e$）以及对状态修改的许可（$w$）。
 
-除了转变到新的状态和交易子状态外，消息调用还有一个额外的元素 --- 用字节数组 $\mathbf{o}$ 表示的输出数据。执行交易时输出数据是被忽略的,但在消息调用时，输出的数据可以由虚拟机代码执行时进行初始化，在这种情况下也使用了这些信息。
+除了可以获得新的状态和交易子状态以外，消息调用还有一个额外的元素——由字节数组 $\mathbf{o}$ 表示的输出数据。执行交易时输出数据是被忽略的，但消息调用可以由 VM 代码执行所产生，在这种情况下就将使用这些信息。
 \begin{equation}
-(\boldsymbol{\sigma}', g', A, \mathbf{o}) \equiv \Theta(\boldsymbol{\sigma}, s, o, r, c, g, p, v, \tilde{v}, \mathbf{d}, e)
+(\boldsymbol{\sigma}', g', A, z, \mathbf{o}) \equiv \Theta(\boldsymbol{\sigma}, s, o, r, c, g, p, v, \tilde{v}, \mathbf{d}, e, w)
 \end{equation}
+注意，对于 {\small DELEGATECALL} 指令，我们需要区分转账额度 $v$ 和执行上下文中出现的 $\tilde{v}$。
 
-注意我们的是,当执行 {\small DELEGATECALL}  指令时,我们需要区别转账额度 $v$ 和执行上下文中的 $\tilde{v}$ 。
-
-
-我们定义在原始状态基础上进行了发送者向接收者转账后的状态为第一个转变状态 $\boldsymbol{\sigma}_1$:
-
+我们定义 $\boldsymbol{\sigma}_1$ 为第一个交易状态，它是在原始状态的基础上加入由发送者向接收者的转账额度后的状态：
 \begin{equation}
-\boldsymbol{\sigma}_1[r]_b \equiv \boldsymbol{\sigma}[r]_b + v \quad\wedge\quad \boldsymbol{\sigma}_1[s]_b \equiv \boldsymbol{\sigma}[s]_b - v
+\boldsymbol{\sigma}_1[r]_{\mathrm{b}} \equiv \boldsymbol{\sigma}[r]_{\mathrm{b}} + v \quad\wedge\quad \boldsymbol{\sigma}_1[s]_{\mathrm{b}} \equiv \boldsymbol{\sigma}[s]_{\mathrm{b}} - v
 \end{equation}
-unless $s = r$.
+除非 $s = r$。
 
-我们假设如果 $\boldsymbol{\sigma}_1[r]$ 还未定义，则会创建一个没有代码或没有状态且余额和随机数都为 0 的账户。我们改进上一个公式:
+按照先前的论述（我们假设如果 $\boldsymbol{\sigma}_1[r]$ 还未定义），则这会创建一个没有代码或状态且 balance 和 nonce 都为 0 的账户。因此上一个公式可以替换为：
 \begin{equation}
 \boldsymbol{\sigma}_1 \equiv \boldsymbol{\sigma}_1' \quad \text{except:} \\
 \end{equation}
 \begin{equation}
-\boldsymbol{\sigma}_1[s]_b \equiv \boldsymbol{\sigma}_1'[s]_b - v
+\boldsymbol{\sigma}_1[s] \equiv \begin{cases}
+\varnothing & \text{if}\ \boldsymbol{\sigma}_1'[s] = \varnothing \ \wedge\ v = 0 \\
+\mathbf{a}_1 &\text{otherwise}
+\end{cases}
+\end{equation}
+\begin{equation}
+\mathbf{a}_1 \equiv \left(\boldsymbol{\sigma}_1'[s]_{\mathrm{n}}, \boldsymbol{\sigma}_1'[s]_{\mathrm{b}} - v, \boldsymbol{\sigma}_1'[s]_{\mathbf{s}}, \boldsymbol{\sigma}_1'[s]_{\mathrm{c}}\right)
 \end{equation}
 \begin{equation}
 \text{and}\quad \boldsymbol{\sigma}_1' \equiv \boldsymbol{\sigma} \quad \text{except:} \\
 \end{equation}
 \begin{equation}
 \begin{cases}
-\boldsymbol{\sigma}_1'[r] \equiv (v, 0, \mathtt{\tiny KEC}(()), \mathtt{\tiny TRIE}(\varnothing)) & \text{if} \quad \boldsymbol{\sigma}[r] = \varnothing \\
-\boldsymbol{\sigma}_1'[r]_b \equiv \boldsymbol{\sigma}[r]_b + v & \text{otherwise}
+\boldsymbol{\sigma}_1'[r] \equiv (0, v, \mathtt{\tiny TRIE}(\varnothing), \mathtt{\tiny KEC}(())) & \text{if} \quad \boldsymbol{\sigma}[r] = \varnothing \wedge v \neq 0 \\
+\boldsymbol{\sigma}_1'[r] \equiv \varnothing & \text{if}\quad \boldsymbol{\sigma}[r] = \varnothing \wedge v = 0 \\
+\boldsymbol{\sigma}_1'[r] \equiv \mathbf{a}_1' & \text{otherwise}
 \end{cases}
 \end{equation}
+\begin{equation}
+\mathbf{a}_1' \equiv (\boldsymbol{\sigma}[r]_{\mathrm{n}}, \boldsymbol{\sigma}[r]_{\mathrm{b}} + v, \boldsymbol{\sigma}[r]_{\mathbf{s}}, \boldsymbol{\sigma}[r]_{\mathrm{c}})
+\end{equation}
 
-
-账户关联的代码（整个代码碎片，Keccak 哈希为  $\boldsymbol{\sigma}[c]_c$）依靠执行模式（见小结 \ref{ch:model}）执行。合约创建时，如果执行因为一个异常（例如：耗尽了燃料、堆栈溢出、无效的跳转目的地或者无效的指令）而被终止，燃料不会返回给调用者，且状态也会立即恢复到转账之前的状态(例如 $\boldsymbol{\sigma}$)。
+账户关联的代码（由 Keccak 哈希为 $\boldsymbol{\sigma}[c]_{\mathrm{c}}$ 的代码片段所标识）会依照执行模型（参见第 \ref{ch:model} 章）来执行。就像合约创建一样，如果执行因为一个异常（也就是说：因为 gas 供给不足、堆栈溢出、无效的跳转目标或者无效的指令）而停止，gas 不会被返还给调用者，并且状态也会立即恢复到转账之前的状态（也就是 $\boldsymbol{\sigma}$）。
 
 \begin{eqnarray}
 \boldsymbol{\sigma}' & \equiv & \begin{cases}
@@ -814,31 +831,48 @@ unless $s = r$.
 \boldsymbol{\sigma}^{**} & \text{otherwise}
 \end{cases} \\
 g' & \equiv & \begin{cases}
-0 & \text{if} \quad \boldsymbol{\sigma}^{**} = \varnothing \\
+0 & \text{if} \quad \boldsymbol{\sigma}^{**} = \varnothing \ \wedge \\
+&\quad \mathbf{o} = \varnothing \\
 g^{**} & \text{otherwise}
+\end{cases} \\ \nonumber
+z & \equiv & \begin{cases}
+0 & \text{if} \quad \boldsymbol{\sigma}^{**} = \varnothing \\
+1 & \text{otherwise}
 \end{cases} \\
-\qquad (\boldsymbol{\sigma}^{**}, g^{**}, A, \mathbf{o}) & \equiv & \begin{cases}
-\Xi_{\mathtt{ECREC}}(\boldsymbol{\sigma}_1, g, I) & \text{if} \quad r = 1 \\
-\Xi_{\mathtt{SHA256}}(\boldsymbol{\sigma}_1, g, I) & \text{if} \quad r = 2 \\
-\Xi_{\mathtt{RIP160}}(\boldsymbol{\sigma}_1, g, I) & \text{if} \quad r = 3 \\
-\Xi_{\mathtt{ID}}(\boldsymbol{\sigma}_1, g, I) & \text{if} \quad r = 4 \\
-\Xi(\boldsymbol{\sigma}_1, g, I) & \text{otherwise} \end{cases} \\
-I_a & \equiv & r \\
-I_o & \equiv & o \\
-I_p & \equiv & p \\
-I_\mathbf{d} & \equiv & \mathbf{d} \\
-I_s & \equiv & s \\
-I_v & \equiv & \tilde{v} \\
-I_e & \equiv & e \\
-\text{Let} \; \mathtt{\tiny KEC}(I_\mathbf{b}) & = & \boldsymbol{\sigma}[c]_c
+(\boldsymbol{\sigma}^{**}, g^{**},A, \mathbf{o}) & \equiv & \Xi\\
+I_{\mathrm{a}} & \equiv & r \\
+I_{\mathrm{o}} & \equiv & o \\
+I_{\mathrm{p}} & \equiv & p \\
+I_{\mathbf{d}} & \equiv & \mathbf{d} \\
+I_{\mathrm{s}} & \equiv & s \\
+I_{\mathrm{v}} & \equiv & \tilde{v} \\
+I_{\mathrm{e}} & \equiv & e \\
+I_{\mathrm{w}} & \equiv & w \\
+\mathbf{t} & \equiv & \{s, r\} \\
 \end{eqnarray}
+\nopagebreak[1]其中
+\begin{equation}
+\Xi \equiv \begin{cases}
+\Xi_{\mathtt{ECREC}}(\boldsymbol{\sigma}_1, g, I, \mathbf{t}) & \text{if} \quad r = 1 \\
+\Xi_{\mathtt{SHA256}}(\boldsymbol{\sigma}_1, g, I, \mathbf{t}) & \text{if} \quad r = 2 \\
+\Xi_{\mathtt{RIP160}}(\boldsymbol{\sigma}_1, g, I, \mathbf{t}) & \text{if} \quad r = 3 \\
+\Xi_{\mathtt{ID}}(\boldsymbol{\sigma}_1, g, I, \mathbf{t}) & \text{if} \quad r = 4 \\
+\Xi_{\mathtt{EXPMOD}}(\boldsymbol{\sigma}_1, g, I, \mathbf{t}) & \text{if} \quad r = 5 \\
+\Xi_{\mathtt{BN\_ADD}}(\boldsymbol{\sigma}_1, g, I, \mathbf{t}) & \text{if} \quad r = 6 \\
+\Xi_{\mathtt{BN\_MUL}}(\boldsymbol{\sigma}_1, g, I, \mathbf{t}) & \text{if} \quad r = 7 \\
+\Xi_{\mathtt{SNARKV}}(\boldsymbol{\sigma}_1, g, I, \mathbf{t}) & \text{if} \quad r = 8 \\
+\Xi(\boldsymbol{\sigma}_1, g, I, \mathbf{t}) & \text{otherwise} \end{cases}
+\end{equation}
 
-我们假设客户端会先保存数据对 $(\mathtt{\tiny KEC}(I_\mathbf{b})，I_\mathbf{b})$ ，以便更方便地根据 $I_\mathbf{b}$ 做出决定。
+\begin{equation}
+\text{Let} \; \mathtt{\tiny KEC}(I_{\mathbf{b}}) = \boldsymbol{\sigma}[c]_{\mathrm{c}}
+\end{equation}
 
-如我们所见，消息调用执行框架 $\Xi$ 中有4个特例: 这四个是‘预编译’合约，作为最初架构中的一部分后续可能会变成本地扩展。这四个合约地址分别为1、2、3和4，分别是用来执行椭圆曲线公钥恢复函数、SHA2 256位哈希方案、RIPEMD 160位哈希方案和身份函数。
+我们假设客户端会保存键值对数据 $(\mathtt{\tiny KEC}(I_{\mathbf{b}}), I_{\mathbf{b}})$，来在某些情况下使获得 $I_{\mathbf{b}}$ 成为可能。
 
-这4个合约的详细定义见附录 \ref{app:precompiled}。
+如我们所见，在消息调用的通用执行框架 $\Xi$ 中有 8 个特例：这是 8 个所谓的‘预编译’合约，它们作为最初架构中的一部分，后续可能会变成\textit{原生扩展}。在地址 1 到 8 上存在的这 8 个合约，分别是椭圆曲线公钥恢复函数、SHA2 256 位哈希方案、RIPEMD 160 位哈希方案、标识函数、任意精度的模幂运算、椭圆曲线加法、椭圆曲线纯量乘法和椭圆曲线配对检查。
 
+它们的完整定义参见附录 \ref{app:precompiled}。
 
 \section{执行模型} \label{ch:model}
 执行模型具体说明怎么使用一系列字节代码指令和一个小的环境数据元组去改变这个系统状态。这些是通过以太坊虚拟机(Ethereum Virtual Machine - EVM),这个虚拟状态机来实现的。它是一个准图灵机,说“准”是因为计算会被燃料所限制。
@@ -1089,7 +1123,7 @@ $B(H)$ 表示对应的区块头 $H$.
  \boldsymbol{\sigma}'[U_c]_b & = & \boldsymbol{\sigma}[U_c]_b + (1 + \frac{1}{8} (U_i - {B_H}_i)) R_b
 \end{eqnarray}
 
-如果叔链和区块的受益者账号冲突（比如：两个相同的叔链受益者账户或者一个叔链受益者账户和当前区块的受益者账户相同），额外的奖励会累积。
+如果叔链和区块的受益者账户冲突（比如：两个相同的叔链受益者账户或者一个叔链受益者账户和当前区块的受益者账户相同），额外的奖励会累积。
 
 我们定义区块的奖励为 5 以太币:
 \begin{equation}
