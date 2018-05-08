@@ -782,15 +782,15 @@ F &\equiv \big((\boldsymbol{\sigma}^{**} = \varnothing \ \wedge\ \mathbf{o} = \v
 注意，在初始化代码执行过程中，一个新创建的地址会出现，但还没有内部的代码\footnote{在初始化代码的执行过程中，当前地址上的 \texttt{EXTCODESIZE} 也就是账户代码的长度应该返回 0。而 \texttt{CODESIZE} 则应该返回初始化代码的长度。（就像\ref{subsec:instruction-set}中定义的那样。）}。因此在这段时间内，任何消息调用都不会引发代码执行。如果这个初始化执行结束于一个 {\small SELFDESTRUCT} 指令，那么这个账户会在交易完成前被删除，这种情况是否合理已在讨论中。对于一个正常的 {\small STOP} 指令代码，或者返回的代码是空的，这时候会出现一个僵尸账户，而且账户中剩余的余额将被永远地锁定在这个僵尸账户中。
 
 \section{消息调用} \label{ch:call}
-当执行消息调用时需要多个参数：发送者（$s$）、交易发起人（$o$）、接收者（$r$）、执行代码的账户（$c$，通常与接收者相同）、可用的 gas（$g$）、转账额度（$v$）、gas 价格（$p$）、函数调用的输入数据（一个任意长度的字节数组 $\mathbf{d}$）、消息调用/合约创建的当前栈深度（$e$）以及对状态修改的许可（$w$）。
+当执行消息调用时需要多个参数：发送者（$s$）、交易发起人（$o$）、接收者（$r$）、执行代码的账户（$c$，通常与接收者相同）、可用的 gas（$g$）、转账金额（$v$）、gas 价格（$p$）、函数调用的输入数据（一个任意长度的字节数组 $\mathbf{d}$）、消息调用/合约创建的当前栈深度（$e$）以及对状态修改的许可（$w$）。
 
 除了可以获得新的状态和交易子状态以外，消息调用还有一个额外的元素——由字节数组 $\mathbf{o}$ 表示的输出数据。执行交易时输出数据是被忽略的，但消息调用可以由 VM 代码执行所产生，在这种情况下就将使用这些信息。
 \begin{equation}
 (\boldsymbol{\sigma}', g', A, z, \mathbf{o}) \equiv \Theta(\boldsymbol{\sigma}, s, o, r, c, g, p, v, \tilde{v}, \mathbf{d}, e, w)
 \end{equation}
-注意，对于 {\small DELEGATECALL} 指令，我们需要区分转账额度 $v$ 和执行上下文中出现的 $\tilde{v}$。
+注意，对于 {\small DELEGATECALL} 指令，我们需要区分转账金额 $v$ 和执行上下文中出现的 $\tilde{v}$。
 
-我们定义 $\boldsymbol{\sigma}_1$ 为第一个交易状态，它是在原始状态的基础上加入由发送者向接收者的转账额度后的状态：
+我们定义 $\boldsymbol{\sigma}_1$ 为第一个交易状态，它是在原始状态的基础上加入由发送者向接收者的转账金额后的状态：
 \begin{equation}
 \boldsymbol{\sigma}_1[r]_{\mathrm{b}} \equiv \boldsymbol{\sigma}[r]_{\mathrm{b}} + v \quad\wedge\quad \boldsymbol{\sigma}_1[s]_{\mathrm{b}} \equiv \boldsymbol{\sigma}[s]_{\mathrm{b}} - v
 \end{equation}
@@ -875,84 +875,90 @@ I_{\mathrm{w}} & \equiv & w \\
 它们的完整定义参见附录 \ref{app:precompiled}。
 
 \section{执行模型} \label{ch:model}
-执行模型具体说明怎么使用一系列字节代码指令和一个小的环境数据元组去改变这个系统状态。这些是通过以太坊虚拟机(Ethereum Virtual Machine - EVM),这个虚拟状态机来实现的。它是一个准图灵机,说“准”是因为计算会被燃料所限制。
+
+执行模型说明了如何使用一系列的字节代码指令和一个环境数据的元组去更改系统状态。这是通过一个正规的虚拟状态机来实现的，也就是以太坊虚拟机（Ethereum Virtual Machine - EVM）。它是一个\textit{准}图灵机，这个“\textit{准}”的限定来源于其中的运算是通过参数 \textit{gas} 来限制的，也就是限定了可以执行的运算总量。
 
 \subsection{基础}
 
-EVM 基于栈结构,机器的字大小（以及栈中数据的大小）是256位。主要是便于执行 Keccak-256 位哈希及椭圆曲线计算。内存模型基于字寻址的字节数据。栈的最大深度为1024。EVM也有一个独立的存储模型；类似内存但更像一个字节数组，一个基于字寻址的字数组。不像易变的内存，存储是非易变的且是作为系统状态的一部分被维护。所有内存和存储中的数据会初始化为0。
+EVM 是一个简单的基于栈的架构。其中字（Word）的大小（也就是栈中数据项的大小）是 256 位。这是为了便于执行 Keccak-256 位哈希和椭圆曲线计算。其内存（memory）模型是简单地基于字寻址（word-addressed）的字节数组。栈的最大深度为 1024。EVM 也有一个独立的存储（storage）模型；它类似于内存的概念，但并不是一个字节数组，而是一个基于字寻址（word-addressable）的字数组（word array）。与不稳定的内存不同，存储是相对稳定的且作为系统状态的一部分被维护。所有内存和存储中的数据都会初始化为 0。
 
-EVM 不是标准的诺依曼结构。它通过一个特别的指令把程序代码保存在一个虚拟的可以交互的 ROM 中，而不是保存在一般性可访问的内存或存储中。
+EVM 不是标准的冯 诺依曼结构。程序代码被保存在一个独立的、仅能通过特定的指令进行交互的虚拟 ROM（即只读存储器，校订注）中，而不是保存在一般的可访问内存或存储中。
 
-EVM 在某些情况下会有异常发生，包括堆栈溢出和非法指令。就像燃料缺乏异常那样，不会改变状态。有异常时，EVM 立即停止并告知执行代理(交易的处理者，或执行环境)，代理会单独处理异常。
+EVM 存在异常执行的情况，包括堆栈溢出和非法指令。在发生像 out-of-gas 这样的异常时，EVM 并不会使状态保持原样，而是会立即停止执行，并告知执行代理（交易的处理程序或递归的执行环境），由代理来独立处理这些异常。
 
 \subsection{费用概述}
 
-在三个不同的情况下使用费用（命名为燃料），在这三种情况下，费用都是执行任何操作的必备条件。第一种情况也是最普通的情况就是计算操作费用（详见附录 \ref{app:fees}）。第二种情况，可能因为一个子消息调用或者合约创建而消耗燃料,这是执行 {\small CREATE}，{\small CALL} and {\small CALLCODE} 费用中的一部分。第三种情况，可能因为内存使用的增多而为燃料付费。
+在三个不同的情况下会收取执行费用（以 gas 来结算），这三种情况都是执行操作的先决条件。第一种情况，也是最普遍的情况就是计算操作费用（详见附录 \ref{app:fees}）。第二种情况，执行一个低级别的消息调用或者合约创建可能需要扣除 gas，这也就是执行 {\small CREATE}，{\small CALL} 和 {\small CALLCODE} 的费用的一部分。最后，内存使用的增加也会消耗一定的 gas。
 
-对于一个账户的执行，内存总费用和需要的 32 字节最小倍数的内存量成正比，所有的内存是按在一定范围中被包含的所有记忆索引（无论是读还是写）下要求的32位字节的最小倍数成比例的。这个为了 just-in-time (JIT) 的基础而去支付的；访问一个大于索引量 32 字节的地址,就会需要额外的内存使用费。地址很容易超过 32 字节的限制，但 EVM 不同。综上所述，必须能够去管理这些可能发生的事件。
+对于一个账户的执行，内存的总费用和其所有内存索引（无论是读还是写）的范围成正比；这个内存范围是 32 字节的最小倍数。这是实时（just-in-time）结算的；也就是说，任何对超出先前已索引的内存区域的访问，都会实时地结算为额外的内存使用费。由于这个费用，内存地址大概不会超过 32 位的界限，但 EVM 的实现必须能够管理这种可能性（就是说，虽然如果内存地址超过 32 位，即大于$\mathbf{2^{32}}$，会产生很高的内存使用费，但 EVM 的实现还是应该支持这种可能性；校订注）。
 
+存储费用则有一个细微差别的行为——激励存储的最小化使用（这直接反映在所有节点中更大的状态数据库里）。清除一个存储中的记录项的执行费用不仅被免除了，而且还会返还；实际上，这种费用返还（退款）是预先发生的，因为首次使用存储位置的费用比正常使用高出很多。
 
-存储费用有一个微妙的行为 —— 为最小化存储费用（直接与一个在所有结点上的大型状态数据通信），清除存储的执行费用指令不仅仅免除,而且会返回一些费用；因为初始化的存储费用往往比实际使用的多,在清除存储空间后会有返回费用，这个返回的费用是预先支付的费用中的一部分。
-
-详细的 EVM 燃料消耗定义见附录 \ref{app:vm}。
+EVM gas 消耗的严格定义参见附录 \ref{app:vm}。
 
 \subsection{执行环境}
 
-除了系统状态$\boldsymbol{\sigma}$ 和 计算过程中剩余的燃料 $g$ 外，还有一些在计算过程中需要提供的信息，这些信息组成了元组 $I$:
+作为系统状态 $\boldsymbol{\sigma}$ 和计算中剩余的 gas $g$ 的补充，还有一些执行代理必须提供的有关执行环境的重要信息，它们包含在元组 $I$ 中：
+
 \begin{itemize}
-\item $I_a$, 拥有正在执行代码的账户地址。
-\item $I_o$, 发起这次交易的发送者地址。
-\item $I_p$, 发起这次交易中的燃料价格。
-\item $I_\mathbf{d}$, 执行过程中的输入字节数组；如果这次执行是一个交易，这个就是交易数据。
-\item $I_s$, 触发代码执行的账户地址；如果这次执行是一个交易，则为交易发送者地址。
-\item $I_v$, 以 Wei 为单位的值,作为计算中的一部分传递给这个账户;如果这次执行是一个交易, 这个值为转账额度。
-\item $I_\mathbf{b}$, 机器代码字节数组, 会用来执行。
-\item $I_H$, 当前区块的区块头。
-\item $I_e$, 当前消息调用或合约创建的深度(例如: 当前 {\small CALL}s 或 {\small CREATE}s 被执行的次数)。
+\item\linkdest{address_of_account_which_owns_code_I__a_def_words}{}\linkdest{I__a} $I_{\mathrm{a}}$，拥有正在执行的代码的账户地址。
+\item\linkdest{address_of_sender_of_tx_that_originated_execution_I__o}{}\linkdest{I__o}，触发这次执行的初始交易的发送者地址。
+\item\linkdest{gas_price_in_tx_that_originated_execution_I__p}{}\linkdest{I__p} $I_{\mathrm{p}}$，触发这次执行的初始交易的 gas 价格。
+\item\linkdest{execution_input_data_I__d}{}\linkdest{I__d} $I_{\mathbf{d}}$，这次执行的输入数据字节数组；如果执行代理是一个交易，这就是交易数据。
+\item\linkdest{the_address_of_the_account_which_caused_the_code_to_be_executing_I__s}{} $I_{\mathrm{s}}$，触发这次执行的账户地址；如果执行代理是一个交易，则为交易发送者地址。
+\item\linkdest{Wei_value_exec_I__v}{}\linkdest{I__v}{} $I_{\mathrm{v}}$，作为这次执行的一部分传到当前账户的转账金额，以 Wei 为单位；如果执行代理是一个交易, 这就是交易的转账金额。
+\item\linkdest{exec_machine_code_I__b}{}\linkdest{I__b} $I_{\mathbf{b}}$，所要执行的机器代码字节数组。
+\item\linkdest{exec_block_header_I__H}{}\linkdest{I__H} $I_{\mathbf{H}}$，当前区块的区块头。
+\item\linkdest{exec_call_or_create_depth_I__e}{}\linkdest{I__e} $I_{\mathrm{e}}$，当前消息调用或合约创建的深度（也就是当前已经被执行的 {\small CALL} 或 {\small CREATE} 的数量）。
+\item\linkdest{exec_permission_to_modify_state_I__w}{}\linkdest{I__w} $I_{\mathrm{w}}$，修改状态的许可。
 \end{itemize}
 
-执行模型定义了函数 $\Xi$, 用来计算结果状态 $\boldsymbol{\sigma}'$, 剩余的燃料 $g'$, 产生的子状态 $A$ 和结果输出 $\mathbf{o}$, 根据当前的上下文,我们定义:
+执行模型定义了函数 $\Xi$，它可以用来计算结果状态 $\boldsymbol{\sigma}'$，剩余的 gas $g'$，累积的子状态 $A$ 和结果输出 $\mathbf{o}$。根据当前的上下文，我们可以把它定义为：
 \begin{equation}
 (\boldsymbol{\sigma}', g', A, \mathbf{o}) \equiv \Xi(\boldsymbol{\sigma}, g, I)
 \end{equation}
 
-应该还记得 $A$, 这个产生的子状态定义为自毁集合 $\mathbf{s}$、 日志系列 $\mathbf{l}$ 和 回推金额 $r$ 的元组:
+这里，我们应该还记得这个累积的子状态 $A$ 是由自毁集合 $\mathbf{s}$、日志集 $\mathbf{l}$、接触过的账户 $\mathbf{t}$ 和返还金额 $r$ 所组成的元组：
+
 \begin{equation}
-A \equiv (\mathbf{s}, \mathbf{l}, r)
+A \equiv (\mathbf{s}, \mathbf{l}, \mathbf{t}, r)
 \end{equation}
 
 \subsection{执行概述}
 
-我们现在必须去定义函数 $\Xi$。在大多实际执行过程中, 将整个系统状态 $\boldsymbol{\sigma}$ 和机器状态 $\boldsymbol{\mu}$ 的迭代过程建模。我们定义一个递归函数 $X$, 它使用这个迭代函数 $O$(定义状态机中单循环的结果), 定义函数 $Z$ 用来表示当前状态是一个异常终止状态, 定义函数 $H$ 表示当前状态是正常终止时得到的结果数据。
+我们现在必须来定义 $\Xi$ 函数了。在大多数可行的实现方案中，都应该对完整的系统状态 $\boldsymbol{\sigma}$ 和机器状态 $\boldsymbol{\mu}$ 一起进行迭代建模。我们定义一个递归函数 $X$，它使用了一个迭代函数 $O$（定义状态机中单次循环的结果），与一个用来确定当前机器状态是否是一个\hyperlink{zhalt}{异常停止}状态的函数 \hyperlink{zhalt}{$Z$} 和一个当且仅当当前机器状态是\hyperlink{hhalt}{正常停止}状态时用来指定指令的输出数据的函数 \hyperlink{hhalt}{$H$}。
 
-空序列使用 $()$ 表示,它不等于空的集合 $\varnothing$；这对理解 $H$ 的输出结果非常重要, 当 $H$ 的输出结果是 $\varnothing$ 时需要继续执行,但当 $H$ 的输出结果是时一个空的序列时执行应该终止。
-
+\hypertarget{empty_sequence_vs_empty_set}{}由 $()$ 表示的空序列并不等于由 $\varnothing$ 表示的空集合，这对于解释 $H$ 的输出非常重要；当 $H$ 的输出是 $\varnothing$ 时需要继续执行，而当其为空序列时则应该停止执行。
 \begin{eqnarray}
-\Xi(\boldsymbol{\sigma}, g, I) & \equiv & (\boldsymbol{\sigma}'\!, \boldsymbol{\mu}'_g, A, \mathbf{o}) \\
-(\boldsymbol{\sigma}, \boldsymbol{\mu}'\!, A, ..., \mathbf{o}) & \equiv & X\big((\boldsymbol{\sigma}, \boldsymbol{\mu}, A^0\!, I)\big) \\
-\boldsymbol{\mu}_g & \equiv & g \\
-\boldsymbol{\mu}_{pc} & \equiv & 0 \\
-\boldsymbol{\mu}_\mathbf{m} & \equiv & (0, 0, ...) \\
-\boldsymbol{\mu}_i & \equiv & 0 \\
-\boldsymbol{\mu}_\mathbf{s} & \equiv & ()
+\Xi(\boldsymbol{\sigma}, g, I, T) & \equiv & (\boldsymbol{\sigma}'\!, \boldsymbol{\mu}'_{\mathrm{g}}, A, \mathbf{o}) \\
+(\boldsymbol{\sigma}', \boldsymbol{\mu}'\!, A, ..., \mathbf{o}) & \equiv & X\big((\boldsymbol{\sigma}, \boldsymbol{\mu}, A^0\!, I)\big) \\
+\boldsymbol{\mu}_{\mathrm{g}} & \equiv & g \\
+\boldsymbol{\mu}_{\mathrm{pc}} & \equiv & 0 \\
+\boldsymbol{\mu}_{\mathbf{m}} & \equiv & (0, 0, ...) \\
+\boldsymbol{\mu}_{\mathrm{i}} & \equiv & 0 \\
+\boldsymbol{\mu}_{\mathbf{s}} & \equiv & () \\
+\boldsymbol{\mu}_{\mathbf{o}} & \equiv & ()
 \end{eqnarray}
-\begin{equation}
+\begin{equation} \label{eq:X-def}
 X\big( (\boldsymbol{\sigma}, \boldsymbol{\mu}, A, I) \big) \equiv \begin{cases}
-\big(\varnothing, \boldsymbol{\mu}, A^0, I, ()\big) & \text{if} \quad Z(\boldsymbol{\sigma}, \boldsymbol{\mu}, I)\\
-O(\boldsymbol{\sigma}, \boldsymbol{\mu}, A, I) \cdot \mathbf{o} & \text{if} \quad \mathbf{o} \neq \varnothing\\
-X\big(O(\boldsymbol{\sigma}, \boldsymbol{\mu}, A, I)\big) & \text{otherwise}\\
+\big(\varnothing, \boldsymbol{\mu}, A^0, I, \varnothing\big) & \text{if} \quad Z(\boldsymbol{\sigma}, \boldsymbol{\mu}, I) \\
+\big(\varnothing, \boldsymbol{\mu}', A^0, I, \mathbf{o}\big) & \text{if} \quad w = \text{\small REVERT} \\
+O(\boldsymbol{\sigma}, \boldsymbol{\mu}, A, I) \cdot \mathbf{o} & \text{if} \quad \mathbf{o} \neq \varnothing \\
+X\big(O(\boldsymbol{\sigma}, \boldsymbol{\mu}, A, I)\big) & \text{otherwise} \\
 \end{cases}
 \end{equation}
 
-where
+其中
 \begin{eqnarray}
 \mathbf{o} & \equiv & H(\boldsymbol{\mu}, I) \\
-(a, b, c, d) \cdot e & \equiv & (a, b, c, d, e)
+(a, b, c, d) \cdot e & \equiv & (a, b, c, d, e) \\
+\boldsymbol{\mu}' & \equiv & \boldsymbol{\mu}\ \text{except:} \\
+\boldsymbol{\mu}'_{\mathrm{g}} & \equiv & \boldsymbol{\mu}_{\mathrm{g}} - C(\boldsymbol{\sigma}, \boldsymbol{\mu}, I)
 \end{eqnarray}
 
-需要注意的是,在推导 $\Xi$ 时, 我们去掉了第4个元素 $I'$ 并从结果状态 $\boldsymbol{\mu}'$ 中提取了剩余的燃料 $\boldsymbol{\mu}'_g$
+注意，在推导 $\Xi$ 时，我们去掉了第 4 个元素 $I'$ 并从机器状态的结果 $\boldsymbol{\mu}'$ 中提取了剩余的 gas $\boldsymbol{\mu}'_{\mathrm{g}}$。
 
-$X$ 被循环调用（这里是递归，但是通常是去执行一个简单的迭代循环）直到 $Z$  变成 true,表示当前状态有异常并且需要终止, 并且所有的改动都会被舍弃;  或者直到 $H$ 变成了一个序列（不是空集合），表示达到了正常的终止状态。
+$X$ 是被循环调用的（这里是递归，但是在实现方案中通常是去执行一个简单的迭代循环）直到 \hyperlink{zhalt}{$Z$} 变为 true，表示当前状态有异常，必须停止执行，并且所有的改动都会被舍弃；或者直到 \hyperlink{hhalt}{$H$} 变为一个序列（不是空集合），表示机器达到了正常控制的停止状态。
 
 \subsubsection{机器状态}
 机器状态 $\boldsymbol{\mu}$ 定义为一个元组 $(g, pc, \mathbf{m}, i, \mathbf{s})$ ,包括可用的燃料 $g$, 程序计数器 $pc \in \mathbb{P}_{256}$ ,内存内容 $\mathbf{m}$ , 内存中激活的字数(从位置 0 开始连续计数) $i$,以及栈内容 $\mathbf{s}$。内存内容 $\boldsymbol{\mu}_\mathbf{m}$ 表示空间大小为 $2^{256}$ 但内容都是 0 的空间。
