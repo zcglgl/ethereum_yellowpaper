@@ -13,8 +13,7 @@ The paper comes as a single ``latex`` file ``Paper.tex``. The latest version is 
 
 In order to build, use the supplied build script (``build.sh``). Following the first time, you can use the standard `pdflatex` tools like http://latex.informatik.uni-halle.de/latex-online/latex.php for compiling/preview. It can be viewed in ``PDF`` format after building.
 
-
-
 ## Other language versions
 - [Chinese](https://github.com/yuange1024/ethereum_yellowpaper) translated by Yuange(崔广斌, 微信: yuange1024 ,加好友时请注明区块链) and Tianlu Gao(高天露)
+- Byzantium Version(f72032b - 2018-05-04) revision by riversyang. See [revision note of this revision](https://github.com/riversyang/ethereum_yellowpaper/blob/master/revision_note/f72032b_2018-05-04.md) (chinese) for detail.
 
