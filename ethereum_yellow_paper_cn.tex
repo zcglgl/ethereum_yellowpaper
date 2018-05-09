@@ -1156,97 +1156,104 @@ R & \equiv & \left(1 + \frac{1}{8} (U_{\mathrm{i}} - {B_{H}}_{\mathrm{i}})\right
 
 \subsection{状态和 nonce 验证}\label{sec:statenoncevalidation}
 
-我们定义函数 $\Gamma$, 映射到区块 \hyperlink{block}{$B$} 的初始状态:
+\hypertarget{Gamma}{}现在我们可以定义函数 $\Gamma$ 了，它区块 $B$ 映射到其初始状态：
 \begin{equation}
 \Gamma(B) \equiv \begin{cases}
-\boldsymbol{\sigma}_0 & \text{if} \quad P(B_H) = \varnothing \\
-\boldsymbol{\sigma}_i: \mathtt{\small TRIE}(L_{S}(\boldsymbol{\sigma}_i)) = {P(B_H)_H}_r & \text{otherwise}
+\boldsymbol{\sigma}_0 kern 10pc \ \text{if} \quad P(B_{H}) = \varnothing \\
+\boldsymbol{\sigma}_{\mathrm{i}}: \mathtt{\small \hyperlink{trie}{TRIE}}(L_{S}(\boldsymbol{\sigma}_{\mathrm{i}})) = {P(B_{H})_{H}}_{\mathrm{r}} \quad\text{otherwise}
 \end{cases}
 \end{equation}
 
-其中，$\mathtt{\small TRIE}(L_{S}(\boldsymbol{\sigma}_i))$ 表示状态 $\boldsymbol{\sigma}_i$ 对应字典树根节点的哈希;执行时会将其保存在状态数据库中,字典树结构天生不易变,所以它是高效的。
+这里，$\mathtt{\small TRIE}(L_{S}(\boldsymbol{\sigma}_i))$ 指由状态 $\boldsymbol{\sigma}_{\mathrm{i}}$ 所构成的 trie 的根节点哈希；我们假定客户端实现会把这个数据保存在状态数据库中，因为这个 trie 是个不可变的数据结构，所以这是简单有效的。
 
-最后定义区块转换函数 $\Phi$，映射了一个不完整区块 \hyperlink{block}{$B$} 到一个完整的区块 $B'$：
+\hypertarget{Phi}{}最后我们定义区块变换函数 $\Phi$，它将一个不完整的区块 $B$ 映射到一个完整区块 $B'$：
 \begin{eqnarray}
 \Phi(B) & \equiv & B': \quad B' = B^* \quad \text{except:} \\
-B'_n & = & n: \quad x \leqslant \frac{2^{256}}{H_d} \\
-B'_m & = & m \quad \text{with } (x, m) = \mathtt{PoW}(B^*_{\hcancel{n}}, n, \mathbf{d}) \\
-B^* & \equiv & B \quad \text{except:} \quad B^*_r = r(\Pi(\Gamma(B), B))
+B'_{\mathrm{n}} & = & n: \quad x \leqslant \frac{2^{256}}{\hyperlink{H__d}{H_{\mathrm{d}}}} \\
+B'_{\mathrm{m}} & = & m \quad \text{with } (x, m) = \mathtt{PoW}(B^*_{\hyperlink{H_cancel_n}{\hcancel{n}}}, n, \mathbf{d}) \\
+B^* & \equiv & B \quad \text{except:} \quad {\hyperlink{Transaction Receipt}{B^*_{\mathrm{r}}}} = \hyperlink{r}{r}(\hyperlink{Pi}{\Pi}(\Gamma(B), B))
 \end{eqnarray}
-其中 $\mathbf{d}$ 是一个数据集, 详见附录 \ref{app:ethash}。
 
-就像在本文开始定义的那样,$\hyperlink{Pi}{\Pi}$ 是状态转换函数，通过区块定稿函数 \hyperlink{Omega}{$\Omega$} 和交易演变函数 \hyperlink{Upsilon_state_transition}{$\Upsilon$} 去定义 $\hyperlink{Pi}{\Pi}$。
+其中 $\mathbf{d}$ 是一个在附录 \ref{app:ethash} 中定义的数据集。
 
-之前的定义中，$\mathbf{R}[n]_{\boldsymbol{\sigma}}$, $\mathbf{R}[n]_\mathbf{l}$ 和 $\mathbf{R}[n]_u$，表示第 n 个对应的状态、日志和累计使用的燃料（在元组中的第四个元素 $\mathbf{R}[n]_b$，之前以日志条目去定义）。前者简单定义为通过对之前的交易状态执行交易得到新的结果状态（如果是第一个交易，之前的交易状态为创始块的状态）:
+就像本文先前定义的那样，$\hyperlink{Pi}{\Pi}$ 是状态转换函数，它概念上是由区块定稿函数 \hyperlink{Omega}{$\Omega$} 和交易计算函数 \hyperlink{Upsilon_state_transition}{$\Upsilon$} 来定义的。
 
+像先前详细介绍过的那样，$\mathbf{R}[n]_{\mathrm{z}}$、$\mathbf{R}[n]_{\mathbf{l}}$ 和 $\mathbf{R}[n]_{\mathrm{u}}$ 是第 $n$ 个交易的状态代码、日志和累积 gas 消耗（元组中的第 4 个元素 $\mathbf{R}[n]_{\mathrm{b}}$ 已经在日志的概念中被定义了）。我们也定义第 $n$ 个状态 $\boldsymbol{\sigma}[n]$，我们可以简单地把它定义为基于先前的交易结果状态（或者对于区块中的第一个交易来说，就是区块的初始状态）来执行当前交易所产生的结果状态：
 \begin{equation}
-\mathbf{R}[n]_{\boldsymbol{\sigma}} = \begin{cases} \Gamma(B) & \text{if} \quad n < 0 \\ \Upsilon(\mathbf{R}[n - 1]_{\boldsymbol{\sigma}}, B_\mathbf{T}[n]) & \text{otherwise} \end{cases}
+\boldsymbol{\sigma}[n] = \begin{cases} \hyperlink{Gamma}{\Gamma}(B) & \text{if} \quad n < 0 \\ \hyperlink{Upsilon}{\Upsilon}(\boldsymbol{\sigma}[n - 1], B_{\mathbf{T}}[n]) & \text{otherwise} \end{cases}
 \end{equation}
 
-对于 $B_\mathbf{R}[n]_u$, 我们定义从之前的交易转变对应交易的累计使用燃料（如果是第一个,则为 0 ）：
-
+在 $B_{\mathbf{R}}[n]_{\mathrm{u}}$ 中，我们使用类似的方法来定义每个交易中加算了前一个交易的 gas 用量（当它是区块中的第一个交易时，则为 0）后的累积用量：
 \begin{equation}
-\mathbf{R}[n]_u = \begin{cases} 0 & \text{if} \quad n < 0 \\
+\mathbf{R}[n]_{\mathrm{u}} = \begin{cases} 0 & \text{if} \quad n < 0 \\
 \begin{array}[b]{l}
-\Upsilon^g(\mathbf{R}[n - 1]_{\boldsymbol{\sigma}}, B_\mathbf{T}[n])\\ \quad + \mathbf{R}[n-1]_u
+\Upsilon^g(\boldsymbol{\sigma}[n - 1], B_{\mathbf{T}}[n])\\ \quad + \mathbf{R}[n-1]_{\mathrm{u}}
 \end{array}
  & \text{otherwise} \end{cases}
 \end{equation}
 
-对于 $\mathbf{R}[n]_\mathbf{l}$, 我们使用之前定义的交易执行函数 $\Upsilon^\mathbf{l}$。
+对于 $\mathbf{R}[n]_{\mathbf{l}}$，我们使用先前在交易执行函数中定义的 \hyperlink{Upsilon_pow_l}{$\Upsilon^\mathbf{l}$}。
 \begin{equation}
 \mathbf{R}[n]_\mathbf{l} =
 \Upsilon^\mathbf{l}(\mathbf{R}[n - 1]_{\boldsymbol{\sigma}}, B_\mathbf{T}[n])
 \end{equation}
 
-最后,我们定义函数 $\hyperlink{Pi}{\Pi}$ 是在交易结果状态 $\ell(B_\mathbf{R})_{\boldsymbol{\sigma}}$ 之上执行了回报函数 \hyperlink{Omega}{$\Omega$} 后的新状态::
+我们用类似的方式定义 \hyperlink{Upsilon_pow_z}{$\mathbf{R}[n]_{\mathrm{z}}$}。
 \begin{equation}
-\Pi(\boldsymbol{\sigma}, B) \equiv \Omega(B, \ell(\mathbf{R})_{\boldsymbol{\sigma}})
+\mathbf{R}[n]_{\mathrm{z}} =
+\Upsilon^{\mathrm{z}}(\boldsymbol{\sigma}[n - 1], B_{\mathbf{T}}[n])
 \end{equation}
 
-到此,我们完成了区块转换机制以及工作量证明 $\mathtt{PoW}$ 的定义。
-
-\subsection{挖矿和工作量证明} \label{ch:pow}
-
-工作量证明（PoW）通过加密安全随机数,来保证要获得要确定满足一定条件的 $n$,要花费一定量的计算资源。通过计算给定意义的数值和难度系数来增加区块链安全性。然而因为挖出一个新的区块会附带一些奖励，工作量证明不仅是保证区块链权威的安全函数，而且也是一个健康的分配机制。
-
-出于以上原因，工作量证明函数有两个重要的目标：首先，它应该尽可能的被更多人去接受。对定制特别硬件的需求或者回报，应该被减到最小。 这使得分配模型尽可能开放，理想情况是，通过挖矿消耗电力获得以太币, 在全世界各个地方都是一样的比例。
-
-第二，应该不允许获得超线性的收益，尤其是在有一个非常高的初始障碍条件下。如果允许这样, 一个资金充足的恶意者可以获得引起麻烦的网络挖矿算力, 并允许给他们获得超线性的汇报（按他们的意愿改变收益分布）,并且会弱化网络的安全性。
-
-比特币世界中一个灾难是 ASICs。有一些计算硬件仅仅是为了做一个简单的任务而存在。在比特币的案例中，这个任务就是 SHA256 哈希函数。当 ASICs 为了工作量证明函数而存在时，两个的目标都会变得危险。因此，一个可抵抗 ASIC 的工作量证明函数（比如难以在专用硬件上执行,或者在专用硬件执行时并不划算）可以作为众所周知的银弹。
-
-防止 ASIC 漏洞的两个方向：第一是去让它变成有序列的内存困难，比如：设计一个函数,确定随机数需要大量的内存和带宽,以至于这些内存不能被并行地去计算随机数。第二个方向是让计算变得更普遍化; 对于这个普遍化的计算,使得特殊硬件和普通的桌面计算机计算起来都差不多。在以太坊 1.0中，我们选择了第一个方向。
-
-以太坊的工作量证明函数如下:
-
+\hypertarget{Pi}{}最后，我们定义 $\Pi$ 为将给定的区块奖励 $\hyperlink{Omega}{\Omega}$ 发放到最后一个交易的结果状态 $\hyperlink{ell}{\ell}(\boldsymbol{\sigma})$ 之上的新状态：
 \begin{equation}
-m = H_m \quad \wedge \quad n \leqslant \frac{2^{256}}{H_d} \quad \text{with} \quad (m, n) = \mathtt{PoW}(H_{\hcancel{n}}, H_n, \mathbf{d})
+\Pi(\boldsymbol{\sigma}, B) \equiv \hyperlink{Omega}{\Omega}(B, \ell(\boldsymbol{\sigma}))
 \end{equation}
 
-其中 $H_{\hcancel{n}}$ 是没有包含随机数和混合哈希元素的新区块头; $H_{\mathrm{n}}$ 是区块头的随机数；$\mathbf{d}$ 是一个需要计算混合哈希值的数据集合;$H_{\mathrm{d}}$ 是新区块的难度值（区块难度详见小结 \ref{ch:ghost} ）。$\mathtt{PoW}$ 是工作量证明函数，这个函数根据数组做计算, 这个数组中的第一个元素是混合哈希,第二个元素是依赖于 $H$ 和 $\mathbf{d}$ 的加密伪随机数。这个算法称为 Ethash , 下文会详细介绍。
+至此，完整的区块转换机制就定义好了。除了工作量证明（Proof-of-Work）函数 $\mathtt{PoW}$ 以外。
+
+\subsection{挖矿工作量证明} \label{ch:pow}
+
+挖矿工作量证明（PoW）通过一个密码学安全的 nonce 来证明为了获得一些象征性的值 $n$，已经付出了一定量的计算。我们使用它，并通过特定意义的难度（且可以扩展为总体难度）以及对难度的可信度认知来确保区块链的安全。然而，因为挖出新的区块会得到其附带的奖励，所以工作量证明不仅是在未来使区块链的权威的获得保障的安全信任方法，同时也是一个利益分配机制。
+
+出于以上原因，工作量证明函数有两个重要的目标：首先，它应该尽可能的被更多人去接受。对特别定制的硬件的需求或由这种硬件所提供的回报，应该被减到最小。这使得分配模型尽可能开放，从而使世界各地的人们都可以以大致相同的比例，通过电力消耗获得以太币。
+
+第二，应该不允许获得超线性的收益，尤其是在有一个很高的初始障碍条件下。否则，一个资金充足的恶意者可以获得引起麻烦的网络挖矿算力，并允许他们获得超线性的回报（按他们的意愿改变收益分布），这也就会弱化网络的安全性。
+
+比特币世界中一个灾难是 ASIC。有一些计算硬件仅仅是为了做一个简单的任务而存在（\cite{ASICSmithMJS}）。在比特币中，这个任务就是 SHA256 哈希函数（\cite{Courtois2014}）。当 ASIC 们为了工作量证明函数而存在时，所有的目标都会变得危险。因此，一个可抵抗 ASIC 的工作量证明函数（也就是难以在专用硬件上执行，或者在专用硬件执行时并不划算）就可以作为谚语中的银弹。
+
+ASIC 抗性的设计有两个方向：第一是去让它成为内存困难（memory-hard）的问题所产生结果，即，设计一个需要大量的内存和带宽，来使这些内存不能被用于并行地计算 \hyperlink{block_nonce}{nonce}。第二个方向是让计算变得更有通用目的（general-purpose）；一个为通用目的“定制的硬件”的意思，就是使得类似于普通的桌面计算机这样的硬件可以适合这种计算。在以太坊 1.0 中，我们选择了第一个方向。
+
+更正式地，工作量证明函数可以用 $\mathtt{PoW}$ 表示：
+\begin{equation}
+m = \hyperlink{H__m}{H_{\mathrm{m}}} \quad \wedge \quad n \leqslant \frac{2^{256}}{\hyperlink{H__d}{H_{\mathrm{d}}}} \quad \text{with} \quad (m, n) = \mathtt{PoW}(\hyperlink{H_cancel_n}{H_{\hcancel{n}}}, H_{\mathrm{n}}, \mathbf{d})
+\end{equation}
+
+其中 $H_{\hcancel{n}}$ 是新区块的头，但\textit{不包含} nonce 和 mixHash；$H_{\mathrm{n}}$ 是区块头的 nonce；$\mathbf{d}$ 是一个计算 mixHash 所需要的大数据集合；$H_{\mathrm{d}}$ 是新区块的难度值（也就是第 \ref{ch:ghost} 章中的区块难度）。$\mathtt{PoW}$ 是工作量证明函数，可以得到一个数组，其中第一个元素是 mixHash，第二个元素是密码学依赖于 $H$ 和 $\mathbf{d}$ 的伪随机数。这个基础算法称为 Ethash，将在下文介绍。
 
 \subsubsection{Ethash}
 
-Ethash 是以太坊 1.0 的 PoW 算法。它是 Dagger-Hashimoto 的最后版本，Buterin
- [2013b] 和 Dryja[2014] 介绍过。再称它为 Dagger-Hashimoto 已不大合适, 因为很多算法的最初特性已经被大量地修改。这个算法的概况如下：
+Ethash 是以太坊 1.0 的 PoW 算法。它是 Dagger-Hashimoto 的最新版本，由 \cite{dagger} 和 \cite{hashimoto} 提出。因为原始算法中的很多特性都在 2015 年 2 月到 5 月 4 日的研发（\cite{commitdateforEthash}）中被修改了，所以再这么称呼它其实已经不太合适。这个算法的大体路线如下：
 
-通过扫描区块头得到一个种子。根据种子可以计算一个初始大小为 $J_{cacheinit}$ 字节位随机数缓存。轻节点客户端可以保存这个缓存。根据缓存，我们能生成一个初始化为 $J_{datasetinit}$ 字节的数据集合，数据集合中每个元素依赖于缓存中的一小部分数据。全节点客户和矿工保存着数据集合。数据集合随时间线性增长。
+我们通过扫描区块头直到某点，来为每个区块计算得到一个种子。根据种子我们可以得到一个初始大小为 $\hyperlink{J__cacheinit}{J_{cacheinit}}$ 字节的伪随机 cache。轻客户端保存这个 cache。根据 cache，我们可以生成一个初始大小为 $\hyperlink{J__datasetinit}{J_{datasetinit}}$ 字节的数据集，数据集中的每个条目仅依赖于 cache 中的一小部分条目。全节点客户端和矿工保存整个数据集。数据集会随时间线性增长。
 
-挖矿涉及到组合数据集合的随机碎片并将他们哈希在一起。使用少量内存就可以验证, 可以借助缓存重新产生需要的数据片段, 所以仅需要保存缓存即可。大的数据集合每$J_{epoch}$ (译者注: 30000) 个区块更新一次，所以大多数矿工的工作都是读取这些数据集合，而不是尝试改变它。附录 \ref{app:ethash} 有 Ethash 的详细解释。
+挖矿则是在数据集中选取随机的部分并将他们一起哈希。可以根据 cache 仅生成验证所需的部分，这样就可以使用少量内存完整验证，所以对于验证来讲，仅需要保存 cache 即可。而大数据集则每 $\hyperlink{J__epoch}{J_{epoch}}$ 个区块更新一次，所以大多数矿工的工作都只是读取这个数据集，而不是改变它。以上提及的参数和算法的详细解释参见附录 \ref{app:ethash}。
 
-\section{执行合约}
-有一些特别有用的合约模式；我们会讨论其中两个,分别是数据订阅和随机数。
+\section{实践合约}
 
-\subsection{数据订阅}
-一个数据订阅合约提供简单的服务：它允许外部的信息进入以太坊系统内。以太坊系统不会保证这个信息的精确度和及时性，这是第二方合约作者的任务, 第二方合约作者使用数据订阅并决定能否信任单个数据订阅服务。
+有一些特别有用的合约模式；我们会讨论其中两个，分别是数据供给（data feeds）和随机数（random numbers）。
 
-通常的模式是,通过消息调用触发单个以太坊中合约，得到一个关于外部现象的信息回应。一个例子可能是纽约当地温度。这个会作为合约执行并返回存储中的一些值。当然存储中的这些值比如温度需要维护以保证准确,这样模式中的第二方才可以将其作为外部服务来运行以太坊节点,当发现一个新区块时立即创建一个新的有效交易发送到合约并更新存储中的值。合约代码将仅仅接受包含指定服务的数据更新。
+\subsection{数据供给}
+
+一个数据供给合约提供简单的服务：它允许外部的信息进入以太坊系统内。以太坊系统不会保证这个信息的精确度和及时性，这是二级合约作者（使用数据供给的合约）的任务，他们需要决定对于单次数据供给服务给予多少信任。
+
+通常的模式会包含一个以太坊内的合约，当给定一个消息调用时，可以回应一些由外部服务提供的信息。一个例子可以是纽约当地的温度。这将会作为一个合约来实现，并返回保存在存储中的一些值。当然，存储中的这些值比如温度需要正确地维护，然后这个模式的第二部分就是用一个外部的服务器来运行以太坊节点，找到一个新区块，创建一个合法的交易发送到合约，然后更新存储中的值。合约代码应该仅接受带有这个服务器的标识的数据更新。
 
 \subsection{随机数}
-在确定系统中提供随机数字,显然是一个不可能实现的任务。然而我们可以利用根据交易时还不可知的数据来生成伪随机数。比如区块哈希值、区块时间戳、区块受益人的地址。为了避免被矿工难以控制这些随机数,建议使用 {\small BLOCKHASH} 操作获得最近 256 个区块的某个区块哈希作为伪随机数。 对于获得这样一系列这样的数字，一个方法就是去增加一个常量并对结果做哈希。
+
+在这样一个严格确定性的系统中提供随机的数字，显然是一个不可能实现的任务。然而我们可以利用在交易时还不可知的数据来生成伪随机数。比如区块的哈希值、区块的时间戳、区块的 beneficiary 地址。为了使恶意矿工难以控制这些数值，建议使用 {\small \hyperlink{blockhash}{BLOCKHASH}} 操作获得最近 256 个区块的哈希值作为伪随机数。如果要获得多个这样的数值，可以去加上一些固定的数值并对结果做哈希。
 
 \section{未来方向} \label{ch:future}
+
 未来状态数据库将不被强行维护所有之前的字典树状态。它应该对每个节点维护一定时间,并抛弃较久远的且不是检查点的节点；检查点或允许特别的区块状态字典树穿越的数据中的系列节点,可以用来最大限度的去替代一些计算, 来获得区块链中的任意一个状态。
 
 区块链合并可以用来减少作为全节点或挖矿节点客户端需要下载的区块数量。及时将给定节点（也许每10000个区块）对应的的字典树压缩, 并在点对点网络中维护，且有效地重塑创世块。下载单个归档时,可以减少下载的区块数量。
@@ -1254,6 +1261,7 @@ Ethash 是以太坊 1.0 的 PoW 算法。它是 Dagger-Hashimoto 的最后版本
 最后，或许会引导压缩区块链：可以抛弃在一定量的区块没有发送或接受交易的字典树状态节点,以便减少状态数据库的增长。
 
 \subsection{可扩展性}
+
 可扩展性仍然是一个永恒的顾虑。因为一个一般化的状态交易函数，使得切分及并行化交易难以使用分而治之的策略。仍未解决的是，系统的平均交易值在增加, 但系统的能力范围却是固定的,其中低价值的交易保存在主账本中已无经济意义,因而会被忽略。尽管如此，一些策略存有可能发展为可扩展性的协议来解决此问题。
 
 一些形式的层次结构，通过合并小的轻量的链到主区块或通过组合小的交易集合构建主区块, 或许可能实现交易组合和区块构建的并行化。并行化机制也可以这样实现: 针对有优先顺序的并列的区块链,通过合并或抛弃无效交易来合并区块。
@@ -1261,13 +1269,15 @@ Ethash 是以太坊 1.0 的 PoW 算法。它是 Dagger-Hashimoto 的最后版本
 最后，可验证的计算，如果可用并且足够有效，可能提供一个方法允许工作量证明成为最后状态的验证。
 
 \section{结论} \label{ch:conclusion}
+
 我们已经介绍讨论并正式定义了以太坊协议。通过这个协议，读者可以太坊网络上部署一个节点并在一个去中心化的安全的开放系统中连接其它节点。合约可能会被授权, 以便计算性地确定和自动化执行交互规则。
 
-\section{致谢}
+\section{鸣谢}
 
 非常感谢 Aeron Buchanan 编写家园版本, Christoph Jentzsch 编写 Ethash 算法,Yoichi Hirai 做了 EIP-150 大多数更新。以太坊开发组织和社区提供了重要的维护和大量的矫正及建议,其中包括Gustav Simonsson, Pawe\l{} Bylica, Jutta Steiner, Nick Savers, Viktor Tr\'{o}n, Marko Simovic, Giacomo Tazzari, 当然,还包含Vitalik Buterin。
 
-\section{可用性}
+\section{文档获取}
+
 本文的英文源文件维护在 \url{https://github.com/ethereum/yellowpaper}。 一个自动生成的英文 PDF 格式文件见 \url{https://ethereum.github.io/yellowpaper/paper.pdf}。
 
 本文的中文源文件维护在 \url{https://github.com/yuange1024/ethereum_yellowpaper}。一个自动生成的中文 PDF 格式文件见 \url{https://github.com/yuange1024/ethereum_yellowpaper/blob/master/ethereum_yellow_paper_cn.pdf}。 (本段由译者增加)
