@@ -17,3 +17,4 @@ In order to build, use the supplied build script (``build.sh``). Following the f
 - [Chinese](https://github.com/yuange1024/ethereum_yellowpaper) translated by Yuange(崔广斌, 微信: yuange1024 ,加好友时请注明区块链) and Tianlu Gao(高天露)
 - Byzantium Version(f72032b - 2018-05-04) revision by riversyang. See [revision note of this revision](https://github.com/riversyang/ethereum_yellowpaper/blob/master/revision_note/f72032b_2018-05-04.md) (chinese) for detail.
 
+The latest version is generally available as a PDF at https://github.com/riversyang/ethereum_yellowpaper/releases .
