@@ -71,7 +71,7 @@
 \author{
     原文作者：Dr. Gavin Wood, gavin@ethcore.io\\
     正文翻译：崔广斌（微信号：yuange1024）；高天露（tianlu.jorden.gao@gmail.com） \\
-    拜占庭版本校订、更新：杨镇（rivers.yang@icloud.com）
+    拜占庭版本增补、原译文校订：杨镇（rivers.yang@icloud.com）
 }
 \begin{document}
 
@@ -1254,33 +1254,33 @@ Ethash 是以太坊 1.0 的 PoW 算法。它是 Dagger-Hashimoto 的最新版本
 
 \section{未来方向} \label{ch:future}
 
-未来状态数据库将不被强行维护所有之前的字典树状态。它应该对每个节点维护一定时间,并抛弃较久远的且不是检查点的节点；检查点或允许特别的区块状态字典树穿越的数据中的系列节点,可以用来最大限度的去替代一些计算, 来获得区块链中的任意一个状态。
+未来，状态数据库将不再被强制要求维护所有之前的 \hyperlink{trie}{trie} 结构。只需要树中节点的一定时间内的数据，并最终丢弃那些不够新的且不是检查点的节点数据。检查点，或数据库中的一个节点集合可以允许对特定的区块状态树的遍历，它们可以用来为在区块链中取回任意状态数据所需的最大计算步骤提供一个上限。
 
-区块链合并可以用来减少作为全节点或挖矿节点客户端需要下载的区块数量。及时将给定节点（也许每10000个区块）对应的的字典树压缩, 并在点对点网络中维护，且有效地重塑创世块。下载单个归档时,可以减少下载的区块数量。
+区块链合并可以用来减少作为全节点或挖矿节点客户端需要下载的区块数量。某一个时点（也许每 10000 个区块）的区块树结构的压缩存档可以在节点网络中维护，它们可以高效地重塑\hyperlink{Genesis_Block}{创世区块}。可以通过下载这样的单个归档文件加上一些强制数量的区块来减少总体下载量。
 
-最后，或许会引导压缩区块链：可以抛弃在一定量的区块没有发送或接受交易的字典树状态节点,以便减少状态数据库的增长。
+最终，或许可以实施区块链压缩：在一定数量的区块中没有进行任何发送/接收交易的状态树节点可以被丢弃，以此来降低以太币的泄露（Ether-leakage）并减小状态数据库的增长。
 
 \subsection{可扩展性}
 
-可扩展性仍然是一个永恒的顾虑。因为一个一般化的状态交易函数，使得切分及并行化交易难以使用分而治之的策略。仍未解决的是，系统的平均交易值在增加, 但系统的能力范围却是固定的,其中低价值的交易保存在主账本中已无经济意义,因而会被忽略。尽管如此，一些策略存有可能发展为可扩展性的协议来解决此问题。
+可扩展性仍然是一个永恒的顾虑。对于一个概括性的状态转换函数，切分和并行化交易将难以使用分而治之的策略。仍未解决的是，系统的动态价值范围大体上是固定，且由于平均交易价值的增加，那些低价值的交易变得可以忽略，从经济角度变得没有必要再包含进主账本中。然而，已经有一些潜在的策略可以用来开发更具可扩展性的协议。
 
-一些形式的层次结构，通过合并小的轻量的链到主区块或通过组合小的交易集合构建主区块, 或许可能实现交易组合和区块构建的并行化。并行化机制也可以这样实现: 针对有优先顺序的并列的区块链,通过合并或抛弃无效交易来合并区块。
+一些形式的层次结构或许可以实现并行化地交易组合和区块构建，比如通过合并小的轻量的链到主区块、或者通过增量式地组合或粘连（通过工作量证明）小的交易集合来构建主区块。并行化也可以通过在一组有优先顺序的并行区块链中，将重复或无效的交易从合并的区块中剔除来实现。
 
-最后，可验证的计算，如果可用并且足够有效，可能提供一个方法允许工作量证明成为最后状态的验证。
+最后，如果可验证的计算能达到足够通用且有效，那么这也许可以提供一种允许将工作量证明作为最终状态的验证的方法。
 
 \section{结论} \label{ch:conclusion}
 
-我们已经介绍讨论并正式定义了以太坊协议。通过这个协议，读者可以太坊网络上部署一个节点并在一个去中心化的安全的开放系统中连接其它节点。合约可能会被授权, 以便计算性地确定和自动化执行交互规则。
+我们已经介绍、讨论并正式定义了以太坊的协议。通过这个协议，读者可以在以太坊网络上实现一个节点并加入大家，成为一个去中心化的安全的社会化操作系统中的一员。合约可以被创作出来，在算法上指定并自主化地执行交互规则。
 
 \section{鸣谢}
 
-非常感谢 Aeron Buchanan 编写家园版本, Christoph Jentzsch 编写 Ethash 算法,Yoichi Hirai 做了 EIP-150 大多数更新。以太坊开发组织和社区提供了重要的维护和大量的矫正及建议,其中包括Gustav Simonsson, Pawe\l{} Bylica, Jutta Steiner, Nick Savers, Viktor Tr\'{o}n, Marko Simovic, Giacomo Tazzari, 当然,还包含Vitalik Buterin。
+非常感谢 Aeron Buchanan 编写 \textit{Homestead} 修订版，Christoph Jentzsch 编写 Ethash 算法，以及 Yoichi Hirai 做了 EIP-150 的大多数修改。以太坊开发组织和社区中的很多其他成员也为这份文档提供了重要的维护、有价值的矫正和建议，包括 Gustav Simonsson, Pawe\l{} Bylica, Jutta Steiner, Nick Savers, Viktor Tr\'{o}n, Marko Simovic, Giacomo Tazzari，当然，还有 Vitalik Buterin。
 
 \section{文档获取}
 
-本文的英文源文件维护在 \url{https://github.com/ethereum/yellowpaper}。 一个自动生成的英文 PDF 格式文件见 \url{https://ethereum.github.io/yellowpaper/paper.pdf}。
+本文的英文源文件维护在 \url{https://github.com/ethereum/yellowpaper}。一个自动生成的英文 PDF 文件在 \url{https://ethereum.github.io/yellowpaper/paper.pdf}。
 
-本文的中文源文件维护在 \url{https://github.com/yuange1024/ethereum_yellowpaper}。一个自动生成的中文 PDF 格式文件见 \url{https://github.com/yuange1024/ethereum_yellowpaper/blob/master/ethereum_yellow_paper_cn.pdf}。 (本段由译者增加)
+本文的中文源文件维护在 \url{https://github.com/riversyang/ethereum_yellowpaper}，一个自动生成的中文 PDF 文件可在此工程的 Releases 下找到。此工程 forked from \url{https://github.com/yuange1024/ethereum_yellowpaper}。（本段由校订人添加。）
 
 \bibliographystyle{plainnat}
 \bibliography{Biblio}
