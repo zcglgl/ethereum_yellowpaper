@@ -130,7 +130,7 @@
 
 $\Upsilon$ 是以太坊状态转换函数。在以太坊中，$\Upsilon$ 和 $\boldsymbol{\sigma}$ 比已有的任何比较系统都强; $\Upsilon$ 可以执行任意计算，而 $\boldsymbol{\sigma}$ 可以储存交易中的任意状态。
 
-区块中记录着交易信息；区块之间通过密码学哈希（hash）以引用的方式链接起来。区块以流水账的方式组织起来，每个区块保留若干交易数据和前一个区块的引用，加上一个最终状态的标识符（最终状态本身不会保存到区块中——否则区块就太大了）。系统激励节点去挖矿（mine）。这种激励作为状态转换函数而发生，会给指定的账户增加价值（即给指定的账户分配挖矿奖励，校订注）。
+区块中记录着交易信息；区块之间通过密码学哈希（hash）以引用的方式链接起来。区块以流水账的方式组织起来，每个区块保留若干交易数据和前一个区块的引用，加上一个最终状态的标识符（最终状态本身不会保存到区块中——否则区块就太大了）。系统激励节点去挖矿（mine）。这种激励以状态转换函数的形式产生，会给指定的账户增加价值（即给指定的账户分配挖矿奖励，校订注）。
 
 挖矿就是通过付出一定的努力（工作量）来与其它潜在的区块竞争一系列交易（一个区块）的记账权。它是通过密码学安全证明来实现的。这个机制就是工作量证明（proof-of-work），会在 \ref{ch:pow} 详细讨论。
 
@@ -141,18 +141,18 @@ B & \equiv & (..., (T_0, T_1, ...) ) \\
 \Pi(\boldsymbol{\sigma}, B) & \equiv & \hyperlink{Omega}{\Omega}(B, \hyperlink{Upsilon}{\Upsilon}(\Upsilon(\boldsymbol{\sigma}, T_0), T_1) ...)
 \end{eqnarray}
 
-其中 \hyperlink{Omega}{$\Omega$} 是区块定稿状态转换函数（这个函数奖励一个特定的账户）；\hyperlink{block}{$B$} 表示一个区块，包含一系列交易作为其组成部分；$\hyperlink{Pi}{\Pi}$ 是区块级的状态转换函数。
+其中 \hyperlink{Omega}{$\Omega$} 是区块定稿状态转换函数（这个函数奖励一个特定的账户）；\hyperlink{block}{$B$} 表示一个区块，包含一系列交易和一些其他组成部分；$\hyperlink{Pi}{\Pi}$ 是区块级的状态转换函数。
 
 这就是区块链范式的基础，这个模型不仅是以太坊的基础，还是迄今为止所有基于共识的去中心化交易系统的基础。
 
-\subsection{面值}
+\subsection{单位}
 
-为了激励网络中的计算，需要一种公允地转移价值的方法。为了解决这个问题，以太坊设计了一种内置的货币——以太币（Ether），也就是我们所知的 {\small ETH}，有时也用古英语中的 \DH{} 表示。以太币最小的面额是 Wei（伟），所有货币值都以 Wei 的整数倍来记录。一个以太币等于 $10^{18}$ Wei。以太币还有以下面额：
+为了激励网络中的计算，需要一种一致同意的转移价值方法。为了解决这个问题，以太坊设计了一种内置的货币——以太币（Ether），也就是我们所知的 {\small ETH}，有时也用古英语中的 \DH{} 表示。以太币最小的单位是 Wei（伟），所有货币值都以 Wei 的整数倍来记录。一个以太币等于 $10^{18}$ Wei。以太币还有以下单位：
 \par
 \begin{center}
 \begin{tabular}{rl}
 \toprule
-倍数 & 面额 \\
+倍数 & 单位 \\
 \midrule
 $10^0$ & Wei（伟） \\
 $10^{12}$ & Szabo（萨博） \\
@@ -163,9 +163,9 @@ $10^{18}$ & Ether（以太） \\
 \end{center}
 \par
 
-在当前状况下，任何价值的标示、以太币上下文、货币、余额或者支付，都应以 Wei 为单位来计算。
+在当前状况下，任何在以太币的上下文中所使用的价值标示，比如货币、余额或者支付，都应以 Wei 为单位来计算。
 
-\subsection{历史?}
+\subsection{如何选择历史?}
 
 因为这是一个去中心化的系统，所有人都有机会在之前的某一个区块之后创建新的区块，这必然会形成一个区块树。为了能在这个区块树上从根节点（\hyperlink{Genesis_Block}{the genesis block}）到叶节点（包含最新交易的区块）形成一个一致的区块链，必须有一个共识方案。如果各个节点所认为的从根节点到叶节点的路径（最佳区块链）不同，那么就会发生分叉。
 
@@ -684,7 +684,7 @@ m & \equiv & {B_{H}}_{\mathrm{c}}
 
 \section{合约创建}\label{ch:create}\hypertarget{endow}{}
 
-创建一个账户需要很多固有参数：发送者（$s$）、原始交易人（$o$）、可用的 gas（$g$）、gas 价格（$p$）、endowment（$v$，即初始捐款）、任意长度的字节数组 $\mathbf{i}$、EVM初始化代码、消息调用/合约创建的当前栈深度（$e$）以及对状态进行修改的许可（$w$）。
+创建一个账户需要很多固有参数：发送者（$s$）、原始交易人（$o$）、可用的 gas（$g$）、gas 价格（$p$）、endowment（$v$，即初始捐款）、任意长度的字节数组（即EVM初始化代码）$\mathbf{i}$、消息调用/合约创建的当前栈深度（$e$）以及对状态进行修改的许可（$w$）。
 
 我们定义创建函数为函数 $\Lambda$，它将使用上述参数，和状态 $\boldsymbol{\sigma}$ 一起来计算出一个新的元组。就像第 \ref{ch:transactions} 节所介绍的那样，这个新的元组包含新的状态、剩余的 gas、交易子状态以及一个错误消息 $(\boldsymbol{\sigma}', g', A, \mathbf{o})$：
 \begin{equation}
@@ -902,7 +902,7 @@ EVM gas 消耗的严格定义参见附录 \ref{app:vm}。
 
 \begin{itemize}
 \item\linkdest{address_of_account_which_owns_code_I__a_def_words}{}\linkdest{I__a} $I_{\mathrm{a}}$，拥有正在执行的代码的账户地址。
-\item\linkdest{address_of_sender_of_tx_that_originated_execution_I__o}{}\linkdest{I__o}，触发这次执行的初始交易的发送者地址。
+\item\linkdest{address_of_sender_of_tx_that_originated_execution_I__o}{}\linkdest{I__o} $I_{\mathrm{o}}$，触发这次执行的初始交易的发送者地址。
 \item\linkdest{gas_price_in_tx_that_originated_execution_I__p}{}\linkdest{I__p} $I_{\mathrm{p}}$，触发这次执行的初始交易的 gas 价格。
 \item\linkdest{execution_input_data_I__d}{}\linkdest{I__d} $I_{\mathbf{d}}$，这次执行的输入数据字节数组；如果执行代理是一个交易，这就是交易数据。
 \item\linkdest{the_address_of_the_account_which_caused_the_code_to_be_executing_I__s}{} $I_{\mathrm{s}}$，触发这次执行的账户地址；如果执行代理是一个交易，则为交易发送者地址。
