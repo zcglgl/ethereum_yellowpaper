@@ -7,14 +7,10 @@ The Yellow Paper is a formal definition of the Ethereum protocol, originally by 
 
 It is free culture work, licensed under the Creative Commons Attribution Share-Alike (CC-BY-SA) version 4.0.
 
-## Usage
 
-The paper comes as a single ``latex`` file ``Paper.tex``. The latest version is generally available as a PDF at https://ethereum.github.io/yellowpaper/paper.pdf or just [yellowpaper.io](http://yellowpaper.io/) .
+以太坊白皮书概要性地介绍了以太坊，以太坊黄皮书通过大量的定义和公式详细地描述了以太坊的技术实现。
 
-In order to build, use the supplied build script (``build.sh``). Following the first time, you can use the standard `pdflatex` tools like http://latex.informatik.uni-halle.de/latex-online/latex.php for compiling/preview. It can be viewed in ``PDF`` format after building.
-
-## Other language versions
-- [Chinese](https://github.com/yuange1024/ethereum_yellowpaper) translated by Yuange(崔广斌, 微信: yuange1024 ,加好友时请注明区块链) and Tianlu Gao(高天露)
-- Byzantium Version(f72032b - 2018-05-04) revision by riversyang. See [revision note of this revision](https://github.com/riversyang/ethereum_yellowpaper/blob/master/revision_note/f72032b_2018-05-04.md) (chinese) for detail.
-
-The latest version is generally available as a PDF at https://github.com/riversyang/ethereum_yellowpaper/releases .
+# 各个语言版本
+- [English Version](https://github.com/ethereum/yellowpaper) originally by Gavin Wood, currently maintained by Nick Savers and with contributions from many people around the world.
+- [中文版](https://github.com/yuange1024/ethereum_yellowpaper/blob/master/ethereum_yellow_paper_cn.pdf) 由崔广斌(微信: yuange1024 ,加好友时请注明区块链) 、高天露 和 riversyang 联合翻译。
+- [French Version](https://github.com/asseth/yellowpaper) translated by Asseth (checkout to branch 'french' ).
