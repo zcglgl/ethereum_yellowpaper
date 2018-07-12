@@ -1,4 +1,4 @@
-# Ethereum Yellow Paper
+# Ethereum Yellow Paper 以太坊黄皮书
 
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/License-CC%20BY--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
 [![Gitter](https://badges.gitter.im/ethereum/yellowpaper.svg)](https://gitter.im/ethereum/yellowpaper?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -14,3 +14,4 @@ It is free culture work, licensed under the Creative Commons Attribution Share-A
 - [English Version](https://github.com/ethereum/yellowpaper) originally by Gavin Wood, currently maintained by Nick Savers and with contributions from many people around the world.
 - [中文版](https://github.com/yuange1024/ethereum_yellowpaper/blob/master/ethereum_yellow_paper_cn.pdf) 由崔广斌(微信: yuange1024 ,加好友时请注明区块链) 、高天露 和 riversyang 联合翻译。
 - [French Version](https://github.com/asseth/yellowpaper) translated by Asseth (checkout to branch 'french' ).
+
